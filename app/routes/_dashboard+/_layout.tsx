@@ -4,7 +4,7 @@ import SidebarPanelMin from '@/components/misc/Sidebar/SidebarPanelMin'
 import '@/styles/customs/sidebar.css'
 import { cn } from '@/utils/misc'
 import { Outlet, useLoaderData } from '@remix-run/react'
-import { BriefcaseBusiness } from 'lucide-react'
+import { Home } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 export function loader() {
@@ -24,7 +24,7 @@ export default function Layout() {
     {
       title: 'Home',
       path: `/home`,
-      icon: <BriefcaseBusiness size={18} />,
+      icon: <Home size={18} />,
     },
   ]
 
