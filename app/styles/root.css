@@ -300,7 +300,7 @@ nav.header .header-container {
 }
 
 .d-list .d-item .d-label {
-  @apply min-w-32 max-w-48 flex-shrink-0 overflow-hidden text-ellipsis whitespace-nowrap font-medium text-navy-400 dark:text-navy-200;
+  @apply min-w-36 max-w-48 flex-shrink-0 overflow-hidden text-ellipsis whitespace-nowrap font-medium text-navy-400 dark:text-navy-200;
 }
 
 .d-list .d-item .d-content {

@@ -10,7 +10,10 @@ const alertVariants = cva(
       variant: {
         default: 'bg-background text-foreground',
         destructive:
-          'border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive',
+          'bg-red-50 border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive',
+        info: 'bg-blue-50 text-blue-800 border-blue-400 dark:bg-blue-700 dark:bg-opacity-50 dark:text-blue-200 dark:border-blue-500 [&>svg]:text-blue-800',
+        success:
+          'bg-green-50 text-green-800 border-green-400 dark:bg-green-700 dark:bg-opacity-50 dark:text-green-200 dark:border-green-500 [&>svg]:text-green-800',
         warning:
           'bg-yellow-50 text-yellow-800 border-yellow-300 dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-700 [&>svg]:text-yellow-800',
       },
@@ -38,11 +41,7 @@ const AlertTitle = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLHeadingElement>
 >(({ className, ...props }, ref) => (
-  <h5
-    ref={ref}
-    className={cn('font-semibold leading-none tracking-tight', className)}
-    {...props}
-  />
+  <h5 ref={ref} className={cn('font-semibold tracking-tight', className)} {...props} />
 ))
 AlertTitle.displayName = 'AlertTitle'
 
