@@ -14,7 +14,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { ActionFunctionArgs } from '@remix-run/node'
 import { Link, useActionData, useLoaderData, useNavigate } from '@remix-run/react'
 import { format } from 'date-fns'
-import { EllipsisVertical, EyeIcon, Pencil, Trash2, Users } from 'lucide-react'
+import { EllipsisVertical, EyeIcon, Pencil, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -97,7 +97,6 @@ export default function ClientPage() {
           return (
             <Card key={client.id} className="mb-2.5 shadow-card">
               <CardContent className="flex items-center gap-2 pt-4">
-                <Users />
                 <div className="flex-1">
                   <Link
                     to={client.id}
