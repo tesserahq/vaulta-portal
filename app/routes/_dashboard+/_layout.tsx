@@ -1,24 +1,32 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Header from '@/components/misc/Header'
 import SidebarPanel, { IMenuItemProps } from '@/components/misc/Sidebar/SidebarPanel'
 import SidebarPanelMin from '@/components/misc/Sidebar/SidebarPanelMin'
+import { fetchApi } from '@/libraries/fetch'
 import '@/styles/customs/sidebar.css'
+import { IUser } from '@/types/user'
 import { cn } from '@/utils/misc'
-import { Outlet, useLoaderData } from '@remix-run/react'
+import { useAuth0 } from '@auth0/auth0-react'
+import { Outlet, useLoaderData, useNavigate } from '@remix-run/react'
 import { Home, Users } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 export function loader() {
-  const hostUrl = process.env.HOST_URL
   const apiUrl = process.env.API_URL
   const nodeEnv = process.env.NODE_ENV
+  const identitiesApiUrl = process.env.IDENTITIES_API_URL
 
-  return { hostUrl, apiUrl, nodeEnv }
+  return { apiUrl, nodeEnv, identitiesApiUrl }
 }
 
 export default function Layout() {
-  const { hostUrl } = useLoaderData<typeof loader>()
+  const { identitiesApiUrl, nodeEnv } = useLoaderData<typeof loader>()
   const [isExpanded, setIsExpanded] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
+  const { getAccessTokenSilently } = useAuth0()
+  const navigate = useNavigate()
+  const [user, setUser] = useState<IUser>()
 
   const menuItems: IMenuItemProps[] = [
     {
@@ -41,6 +49,22 @@ export default function Layout() {
     }
   }, [])
 
+  const fetchUser = async () => {
+    try {
+      const token = await getAccessTokenSilently()
+      const user = await fetchApi(`${identitiesApiUrl}/user`, token, nodeEnv!)
+      setUser(user)
+    } catch (error: any) {
+      const convertError = JSON.parse(error?.message)
+
+      if (convertError.status === 401) {
+        navigate('/logout')
+      }
+
+      toast.error(`${convertError.status} - ${convertError.error}`)
+    }
+  }
+
   useEffect(() => {
     onResize()
 
@@ -50,6 +74,10 @@ export default function Layout() {
       window.removeEventListener('resize', onResize)
     }
   }, [onResize])
+
+  useEffect(() => {
+    fetchUser()
+  }, [])
 
   return (
     <div
@@ -70,8 +98,8 @@ export default function Layout() {
         </div>
 
         <Header
+          user={user!}
           withSidebar
-          hostUrl={hostUrl}
           isExpanded={isExpanded}
           setIsExpanded={setIsExpanded}
         />

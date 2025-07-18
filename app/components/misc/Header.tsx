@@ -2,7 +2,6 @@
 import { useRequestInfo } from '@/hooks/useRequestInfo'
 import { ROUTE_PATH as THEME_PATH } from '@/routes/resources+/update-theme'
 import { cn } from '@/utils/misc'
-import { useAuth0 } from '@auth0/auth0-react'
 import { Link, useNavigate, useSubmit } from '@remix-run/react'
 import { Grip } from 'lucide-react'
 import { useState } from 'react'
@@ -12,13 +11,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dr
 import Separator from '../ui/separator'
 import MenuToggle from './MenuToggle'
 import ProfileMenu from 'core-ui'
+import { IUser } from '@/types/user'
 
 interface IHeaderProps {
+  user: IUser
   action?: React.ReactNode
   withSidebar?: boolean
   isExpanded?: boolean
   setIsExpanded?: (isExpanded: boolean) => void
-  hostUrl?: string
 }
 
 export default function Header({
@@ -26,10 +26,10 @@ export default function Header({
   setIsExpanded,
   action,
   withSidebar,
+  user,
 }: IHeaderProps) {
   const requestInfo = useRequestInfo()
   const submit = useSubmit()
-  const { user } = useAuth0()
   const navigate = useNavigate()
   const [isOpenAppMenu, setIsOpenAppMenu] = useState<boolean>(false)
   const onSetTheme = () => {
@@ -122,8 +122,8 @@ export default function Header({
                 </DropdownMenuContent>
               </DropdownMenu>
               <ProfileMenu
-                name={user?.name || ''}
-                avatar={user?.picture || '/images/default-user-avatar.jpg'}
+                name={`${user?.first_name || ''} ${user?.last_name || ''}`}
+                avatar={user?.avatar_url || '/images/default-user-avatar.jpg'}
                 actionProfile={() => {}}
                 actionLogout={() => navigate('/logout')}
                 email={user?.email || ''}
