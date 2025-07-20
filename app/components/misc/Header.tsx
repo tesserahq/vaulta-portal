@@ -4,17 +4,17 @@ import { ROUTE_PATH as THEME_PATH } from '@/routes/resources+/update-theme'
 import { cn } from '@/utils/misc'
 import { Link, useNavigate, useSubmit } from '@remix-run/react'
 import { Grip } from 'lucide-react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Avatar, AvatarImage } from '../ui/avatar'
 import { Button } from '../ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown'
 import Separator from '../ui/separator'
 import MenuToggle from './MenuToggle'
-import ProfileMenu from 'core-ui'
-import { IUser } from '@/types/user'
+import { IdentiesProvider, ProfileMenu } from 'core-ui'
 
 interface IHeaderProps {
-  user: IUser
+  apiUrl: string
+  token: string
   action?: React.ReactNode
   withSidebar?: boolean
   isExpanded?: boolean
@@ -26,15 +26,16 @@ export default function Header({
   setIsExpanded,
   action,
   withSidebar,
-  user,
+  apiUrl,
+  token,
 }: IHeaderProps) {
   const requestInfo = useRequestInfo()
   const submit = useSubmit()
   const navigate = useNavigate()
   const [isOpenAppMenu, setIsOpenAppMenu] = useState<boolean>(false)
-  const onSetTheme = () => {
+  const onSetTheme = (value: string) => {
     submit(
-      { theme: requestInfo.userPrefs.theme === 'dark' ? 'light' : 'dark' },
+      { theme: value },
       {
         method: 'POST',
         action: THEME_PATH,
@@ -121,15 +122,22 @@ export default function Header({
                   })}
                 </DropdownMenuContent>
               </DropdownMenu>
-              <ProfileMenu
-                name={`${user?.first_name || ''} ${user?.last_name || ''}`}
-                avatar={user?.avatar_url || '/images/default-user-avatar.jpg'}
-                actionProfile={() => {}}
-                actionLogout={() => navigate('/logout')}
-                email={user?.email || ''}
-                selectedTheme={requestInfo.userPrefs.theme || 'system'}
-                onSetTheme={onSetTheme}
-              />
+
+              <IdentiesProvider
+                config={{
+                  baseURL: apiUrl,
+                  token: token,
+                }}>
+                <ProfileMenu
+                  defaultAvatar="/images/default-avatar.jpg"
+                  selectedTheme={requestInfo.userPrefs.theme || 'system'}
+                  onSetTheme={(theme) => onSetTheme(theme)}
+                  actionLogout={() => navigate('/logout')}
+                  actionProfile={() => {
+                    window.open('https://identies.estate-buddy.com', '_blank')
+                  }}
+                />
+              </IdentiesProvider>
             </div>
           </div>
         </div>

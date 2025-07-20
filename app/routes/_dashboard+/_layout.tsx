@@ -2,31 +2,27 @@
 import Header from '@/components/misc/Header'
 import SidebarPanel, { IMenuItemProps } from '@/components/misc/Sidebar/SidebarPanel'
 import SidebarPanelMin from '@/components/misc/Sidebar/SidebarPanelMin'
-import { fetchApi } from '@/libraries/fetch'
 import '@/styles/customs/sidebar.css'
-import { IUser } from '@/types/user'
 import { cn } from '@/utils/misc'
 import { useAuth0 } from '@auth0/auth0-react'
-import { Outlet, useLoaderData, useNavigate } from '@remix-run/react'
+import { Outlet, useLoaderData } from '@remix-run/react'
 import { Home, Users } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 export function loader() {
   const apiUrl = process.env.API_URL
-  const nodeEnv = process.env.NODE_ENV
   const identitiesApiUrl = process.env.IDENTITIES_API_URL
 
-  return { apiUrl, nodeEnv, identitiesApiUrl }
+  return { apiUrl, identitiesApiUrl }
 }
 
 export default function Layout() {
-  const { identitiesApiUrl, nodeEnv } = useLoaderData<typeof loader>()
+  const { identitiesApiUrl } = useLoaderData<typeof loader>()
   const [isExpanded, setIsExpanded] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
   const { getAccessTokenSilently } = useAuth0()
-  const navigate = useNavigate()
-  const [user, setUser] = useState<IUser>()
+  const [token, setToken] = useState<string>('')
 
   const menuItems: IMenuItemProps[] = [
     {
@@ -49,19 +45,12 @@ export default function Layout() {
     }
   }, [])
 
-  const fetchUser = async () => {
+  const fetchToken = async () => {
     try {
       const token = await getAccessTokenSilently()
-      const user = await fetchApi(`${identitiesApiUrl}/user`, token, nodeEnv!)
-      setUser(user)
+      setToken(token)
     } catch (error: any) {
-      const convertError = JSON.parse(error?.message)
-
-      if (convertError.status === 401) {
-        navigate('/logout')
-      }
-
-      toast.error(`${convertError.status} - ${convertError.error}`)
+      toast.error(error.message)
     }
   }
 
@@ -76,7 +65,7 @@ export default function Layout() {
   }, [onResize])
 
   useEffect(() => {
-    fetchUser()
+    fetchToken()
   }, [])
 
   return (
@@ -98,7 +87,8 @@ export default function Layout() {
         </div>
 
         <Header
-          user={user!}
+          token={token!}
+          apiUrl={identitiesApiUrl!}
           withSidebar
           isExpanded={isExpanded}
           setIsExpanded={setIsExpanded}
