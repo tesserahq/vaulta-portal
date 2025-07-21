@@ -12,13 +12,14 @@ import { toast } from 'sonner'
 
 export function loader() {
   const apiUrl = process.env.API_URL
-  const identitiesApiUrl = process.env.IDENTITIES_API_URL
+  const identiesApiUrl = process.env.IDENTIES_API_URL
+  const identiesHosturl = process.env.IDENTIES_HOST_URL
 
-  return { apiUrl, identitiesApiUrl }
+  return { apiUrl, identiesApiUrl, identiesHosturl }
 }
 
 export default function Layout() {
-  const { identitiesApiUrl } = useLoaderData<typeof loader>()
+  const { identiesApiUrl, identiesHosturl } = useLoaderData<typeof loader>()
   const [isExpanded, setIsExpanded] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
   const { getAccessTokenSilently } = useAuth0()
@@ -88,7 +89,8 @@ export default function Layout() {
 
         <Header
           token={token!}
-          apiUrl={identitiesApiUrl!}
+          identiesApiUrl={identiesApiUrl!}
+          identiesHostUrl={identiesHosturl!}
           withSidebar
           isExpanded={isExpanded}
           setIsExpanded={setIsExpanded}

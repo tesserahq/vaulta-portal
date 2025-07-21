@@ -13,7 +13,8 @@ import MenuToggle from './MenuToggle'
 import { IdentiesProvider, ProfileMenu } from 'core-ui'
 
 interface IHeaderProps {
-  apiUrl: string
+  identiesApiUrl: string
+  identiesHostUrl: string
   token: string
   action?: React.ReactNode
   withSidebar?: boolean
@@ -26,7 +27,8 @@ export default function Header({
   setIsExpanded,
   action,
   withSidebar,
-  apiUrl,
+  identiesApiUrl,
+  identiesHostUrl,
   token,
 }: IHeaderProps) {
   const requestInfo = useRequestInfo()
@@ -125,7 +127,7 @@ export default function Header({
 
               <IdentiesProvider
                 config={{
-                  baseURL: apiUrl,
+                  baseURL: identiesApiUrl,
                   token: token,
                 }}>
                 <ProfileMenu
@@ -133,9 +135,7 @@ export default function Header({
                   selectedTheme={requestInfo.userPrefs.theme || 'system'}
                   onSetTheme={(theme) => onSetTheme(theme)}
                   actionLogout={() => navigate('/logout')}
-                  actionProfile={() => {
-                    window.open('https://identies.estate-buddy.com', '_blank')
-                  }}
+                  actionProfile={() => window.open(identiesHostUrl, '_blank')}
                 />
               </IdentiesProvider>
             </div>
