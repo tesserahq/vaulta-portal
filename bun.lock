@@ -36,7 +36,7 @@
         "date-fns": "^4.1.0",
         "express": "^4.21.2",
         "express-rate-limit": "^7.5.0",
-        "core-ui": "git+https://github.com/estate-buddy-tech/core-ui.git#fetch",
+        "core-ui": "git+https://github.com/estate-buddy-tech/core-ui.git",
         "helmet": "^7.2.0",
         "i18next": "^23.16.8",
         "i18next-browser-languagedetector": "^8.0.2",
@@ -706,7 +706,7 @@
 
     "cookie-signature": ["cookie-signature@1.2.2", "", {}, "sha512-D76uU73ulSXrD1UXF4KE2TMxVVwhsnCgfAyTg9k8P6KGZjlXKrOLe4dJQKI3Bxi5wjesZoFXJWElNWBjPZMbhg=="],
 
-    "core-ui": ["core-ui@github:estate-buddy-tech/core-ui#b1aaa0e", { "dependencies": { "axios": "^1.10.0" }, "peerDependencies": { "react": "^19.1.0", "react-dom": "^19.1.0", "tailwindcss": "^4.1.11" } }, "estate-buddy-tech-core-ui-b1aaa0e"],
+    "core-ui": ["core-ui@github:estate-buddy-tech/core-ui#a5d4cb5", { "dependencies": { "axios": "^1.10.0" }, "peerDependencies": { "react": "^19.1.0", "react-dom": "^19.1.0", "tailwindcss": "^4.1.11" } }, "estate-buddy-tech-core-ui-a5d4cb5"],
 
     "core-util-is": ["core-util-is@1.0.3", "", {}, "sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ=="],
 
