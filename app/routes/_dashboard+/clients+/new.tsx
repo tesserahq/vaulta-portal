@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/tooltip'
 import { fetchApi } from '@/libraries/fetch'
 import { clientSchema } from '@/schemas/client'
+import { formatString } from '@/utils/format-string'
 import { cn } from '@/utils/misc'
 import { redirectWithToast } from '@/utils/toast.server'
 import { useAuth0 } from '@auth0/auth0-react'
@@ -41,46 +42,48 @@ export default function ClientNewPage() {
     if (token) setToken(token)
   }
 
-  const onChange = (key: string, value: string) => {
-    setFormValue({ ...formValue, [key]: value })
+  const onValidateClientID = (value: string) => {
+    const errors: string[] = []
 
-    if (key === 'client_id' && value) {
-      const errors: string[] = []
-
-      // 1. Must be lowercase alphanumeric characters (a-z, 0-9) and dash
-      if (!/^[a-z0-9-]*$/.test(value)) {
-        errors.push(
-          'Client ID must contain only lowercase letters (a-z), numbers (0-9), and dashes (-).',
-        )
-      }
-
-      // 2. Cannot start with a dash
-      if (/^-/.test(value)) {
-        errors.push('Client ID cannot start with a dash (-).')
-      }
-
-      // 3. Cannot end with a dash
-      if (/-$/.test(value)) {
-        errors.push('Client ID cannot end with a dash (-).')
-      }
-
-      // 5. Must be ≤ 63 characters in length
-      if (value.length > 63) {
-        errors.push('Client ID must be 63 characters or less.')
-      }
-
-      if (errors.length > 0) {
-        setErrorFields((prev: any) => ({
-          ...prev,
-          client_id: errors,
-        }))
-      } else {
-        setErrorFields((prev: any) => ({
-          ...prev,
-          client_id: null,
-        }))
-      }
+    if (!value) {
+      errors.push('Cliend ID is required')
     }
+
+    // 1. Must be lowercase alphanumeric characters (a-z, 0-9) and dash
+    if (!/^[a-z0-9-]*$/.test(value)) {
+      errors.push(
+        'Client ID must contain only lowercase letters (a-z), numbers (0-9), no space and dashes (-).',
+      )
+    }
+
+    // 2. Cannot start with a dash
+    if (/^-/.test(value)) {
+      errors.push('Client ID cannot start with a dash (-).')
+    }
+
+    // 3. Cannot end with a dash
+    if (/-$/.test(value)) {
+      errors.push('Client ID cannot end with a dash (-).')
+    }
+
+    // 5. Must be ≤ 63 characters in length
+    if (value.length > 63) {
+      errors.push('Client ID must be 63 characters or less.')
+    }
+
+    if (errors.length > 0) {
+      setErrorFields((prev: any) => ({
+        ...prev,
+        client_id: errors,
+      }))
+    } else {
+      setErrorFields((prev: any) => ({
+        ...prev,
+        client_id: null,
+      }))
+    }
+
+    setFormValue({ ...formValue, client_id: value })
   }
 
   useEffect(() => {
@@ -100,8 +103,8 @@ export default function ClientNewPage() {
   }, [actionData])
 
   return (
-    <div className="content-center">
-      <Card className="card-center">
+    <div className="coreui-content-center">
+      <Card className="coreui-card-center">
         <CardHeader>
           <CardTitle>Create Client</CardTitle>
         </CardHeader>
@@ -186,7 +189,13 @@ export default function ClientNewPage() {
                   name="name"
                   autoFocus
                   value={formValue.name}
-                  onChange={(e) => onChange('name', e.target.value)}
+                  onChange={(e) => {
+                    setFormValue({
+                      name: e.target.value,
+                      client_id: formatString('kebab-case', e.target.value),
+                    })
+                    setErrorFields({ ...errorFields, client_id: null })
+                  }}
                   className={cn(errorFields?.name && 'input-error')}
                 />
                 {errorFields?.name && (
@@ -198,7 +207,7 @@ export default function ClientNewPage() {
                 <Input
                   name="client_id"
                   value={formValue.client_id}
-                  onChange={(e) => onChange('client_id', e.target.value)}
+                  onChange={(e) => onValidateClientID(e.target.value)}
                   className={cn(errorFields?.client_id && 'input-error')}
                 />
                 {errorFields?.client_id?.length > 0 && (
