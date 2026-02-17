@@ -11,8 +11,8 @@ import { IClient } from '@/types/client'
 import { formatDateAgo } from '@/utils/date-format'
 import { redirectWithToast } from '@/utils/toast.server'
 import { useAuth0 } from '@auth0/auth0-react'
-import { ActionFunctionArgs } from '@remix-run/node'
-import { Link, useActionData, useLoaderData, useNavigate } from '@remix-run/react'
+import type { ActionFunctionArgs } from 'react-router'
+import { Link, useActionData, useLoaderData, useNavigate } from 'react-router'
 import { format } from 'date-fns'
 import { EllipsisVertical, EyeIcon, Pencil, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -44,7 +44,7 @@ export default function ClientPage() {
       const response = await fetchApi(
         `${apiUrl}/clients?skip=${skip}&limit${limit}`,
         token,
-        nodeEnv,
+        nodeEnv
       )
 
       setClients(response)
@@ -87,7 +87,7 @@ export default function ClientPage() {
           <EmptyContent
             image="/images/empty-client.png"
             title="Manage Your Clients with Ease"
-            description="No clients yet—let’s get started! Add client info to keep everything in one place and make every interaction count.">
+            description="Add client info to keep everything in one place and make every interaction count.">
             <Button variant="black" onClick={() => navigate('new')}>
               Start Creating
             </Button>
@@ -100,7 +100,8 @@ export default function ClientPage() {
                 <div className="flex-1">
                   <Link
                     to={client.id}
-                    className="mb-1 text-base font-medium text-black hover:text-primary hover:underline dark:text-primary-foreground">
+                    className="mb-1 text-base font-medium text-black hover:text-primary
+                      hover:underline dark:text-primary-foreground">
                     {client.name}
                   </Link>
                   <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">

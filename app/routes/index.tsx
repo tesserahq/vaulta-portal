@@ -2,8 +2,8 @@ import { AppPreloader } from '@/components/misc/AppPreloader'
 import { Button } from '@/components/ui/button'
 import { SITE_CONFIG } from '@/constants/brand'
 import { useAuth0 } from '@auth0/auth0-react'
-import type { MetaFunction } from '@remix-run/node'
-import { Navigate, useSearchParams } from '@remix-run/react'
+import type { MetaFunction } from 'react-router'
+import { Navigate, useSearchParams } from 'react-router'
 import { useEffect } from 'react'
 
 export const meta: MetaFunction = () => {
@@ -32,17 +32,19 @@ export default function Index() {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/home" />
+    return <Navigate to="/clients" />
   }
 
   return (
-    <div className="flex h-screen w-full animate-slide-up flex-col items-center justify-center gap-5 bg-white dark:bg-background lg:flex-row">
+    <div
+      className="flex h-screen w-full animate-slide-up flex-col items-center justify-center gap-5
+        bg-white dark:bg-background lg:flex-row">
       <img src="/images/login.png" alt="login" className="w-96 rounded-lg" />
       <div className="max-w-[400px] flex-col items-center lg:items-start">
         <h1 className="mt-3 text-3xl font-semibold dark:text-white">Welcome back!</h1>
         <p className="mt-1 text-base opacity-70 dark:text-primary-foreground">
-          Log in to access Vaulta Portal and manage file storage service designed for
-          modern applications.
+          Log in to access Vaulta Portal and manage file storage service designed for modern
+          applications.
         </p>
         <div className="mt-5">
           <Button onClick={() => loginWithRedirect()}>Login</Button>

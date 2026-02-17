@@ -2,23 +2,12 @@
 import { AppPreloader } from '@/components/misc/AppPreloader'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { fetchApi } from '@/libraries/fetch'
 import { IClient } from '@/types/client'
 import { useAuth0 } from '@auth0/auth0-react'
-import { useLoaderData, useNavigate, useParams } from '@remix-run/react'
+import { useLoaderData, useNavigate, useParams } from 'react-router'
 import { format } from 'date-fns'
 import { Check, CheckCircle2Icon, Copy } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -73,7 +62,7 @@ export default function ClientDetailPage() {
         {
           method: 'POST',
           body: JSON.stringify({ client_id: params.client_id }),
-        },
+        }
       )
 
       setClient(response)
@@ -110,15 +99,14 @@ export default function ClientDetailPage() {
             <Alert variant="success" className="mb-3">
               <CheckCircle2Icon size={18} className="dark:text-green-100" />
               <AlertTitle>
-                Make sure to copy your personal token now. You won&apos;t be able to see
-                it again!
+                Make sure to copy your personal token now. You won&apos;t be able to see it again!
               </AlertTitle>
               <AlertDescription>
                 <div className="flex items-center gap-2">
-                  <div className="mt-2 flex items-center justify-between rounded-lg bg-green-100 px-3 py-2 text-sm dark:bg-green-600">
-                    <span className="font-mono font-medium dark:text-white">
-                      {client?.secret}
-                    </span>
+                  <div
+                    className="mt-2 flex items-center justify-between rounded-lg bg-green-100 px-3
+                      py-2 text-sm dark:bg-green-600">
+                    <span className="font-mono font-medium dark:text-white">{client?.secret}</span>
                     <TooltipProvider delayDuration={100}>
                       <Tooltip>
                         <TooltipTrigger>
@@ -164,9 +152,7 @@ export default function ClientDetailPage() {
             </div>
             <div className="d-item">
               <div className="d-label">Secret Generated At</div>
-              <div className="d-content">
-                {format(client?.secret_generated_at || '', 'PPpp')}
-              </div>
+              <div className="d-content">{format(client?.secret_generated_at || '', 'PPpp')}</div>
             </div>
           </div>
         </CardContent>

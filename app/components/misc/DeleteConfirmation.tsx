@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Form, useFetcher, useNavigation } from '@remix-run/react'
+import { Form, useFetcher, useNavigation } from 'react-router'
 import React, { forwardRef, useImperativeHandle, useState } from 'react'
 import { cn } from '@/utils/misc'
 
@@ -27,7 +27,7 @@ interface IModalDeleteProps {
 
 const ModalDelete: React.ForwardRefRenderFunction<FuncProps, IModalDeleteProps> = (
   { title, error, data, alert },
-  ref,
+  ref
 ) => {
   const { formMethod, state } = useNavigation()
   const [open, setOpen] = useState<boolean>(false)
@@ -66,9 +66,7 @@ const ModalDelete: React.ForwardRefRenderFunction<FuncProps, IModalDeleteProps> 
             <h1 className="mb-3 mt-3 text-2xl font-medium text-black dark:text-secondary-foreground">
               {title}
             </h1>
-            <p className="mb-3 text-sm">
-              To confirm, type &quot;delete&quot; in the box below
-            </p>
+            <p className="mb-3 text-sm">To confirm, type &quot;delete&quot; in the box below</p>
             <Input
               name="delete_confirm"
               className={cn('mb-2 text-black', fieldError && 'input-error')}
@@ -83,15 +81,9 @@ const ModalDelete: React.ForwardRefRenderFunction<FuncProps, IModalDeleteProps> 
               <Button variant="outline">Cancel</Button>
             </DialogClose>
             <Form method="DELETE">
-              <input
-                name="delete_confirm"
-                value={confirmMsg.toLowerCase()}
-                className="hidden"
-              />
+              <input name="delete_confirm" value={confirmMsg.toLowerCase()} className="hidden" />
               {Object.entries(data).map(([key, value]: any) => {
-                return (
-                  <input key={key} name={key} value={value || ''} className="hidden" />
-                )
+                return <input key={key} name={key} value={value || ''} className="hidden" />
               })}
               <Button
                 variant="destructive"

@@ -1,12 +1,7 @@
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/utils/misc'
-import { Link, useLocation } from '@remix-run/react'
+import { Link, useLocation } from 'react-router'
 import { IMenuItemProps } from './SidebarPanel'
 // import MenuToggle from '../MenuToggle'
 
@@ -52,8 +47,7 @@ export default function SidebarPanelMin({
                           to={item.path}
                           className={cn(
                             '',
-                            (pathname === item.path || getActiveMenu(item.title)) &&
-                              'active',
+                            (pathname === item.path || getActiveMenu(item.title)) && 'active'
                           )}>
                           {item.icon}
                         </Link>

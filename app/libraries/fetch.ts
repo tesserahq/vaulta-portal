@@ -7,7 +7,7 @@ export const fetchApi = async (
   endpoint: string,
   token: string,
   node_env: NodeENVType,
-  options: RequestInit = {},
+  options: RequestInit = {}
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const headers: any = { 'Content-Type': 'application/json' }
@@ -49,7 +49,7 @@ export const fetchApi = async (
             ? json.detail
             : json?.detail[0]?.msg
           : response.statusText,
-      }),
+      })
     )
   }
 

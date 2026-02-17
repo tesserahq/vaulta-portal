@@ -4,20 +4,15 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { fetchApi } from '@/libraries/fetch'
 import { clientSchema } from '@/schemas/client'
 import { formatString } from '@/utils/format-string'
 import { cn } from '@/utils/misc'
 import { redirectWithToast } from '@/utils/toast.server'
 import { useAuth0 } from '@auth0/auth0-react'
-import { ActionFunctionArgs } from '@remix-run/node'
-import { Form, useActionData, useNavigate, useNavigation } from '@remix-run/react'
+import type { ActionFunctionArgs } from 'react-router'
+import { Form, useActionData, useNavigate, useNavigation } from 'react-router'
 import { format } from 'date-fns'
 import { AlertCircleIcon, Check, CheckCircle2Icon, Copy } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -26,7 +21,7 @@ import { toast } from 'sonner'
 export default function ClientNewPage() {
   const navigate = useNavigate()
   const navigation = useNavigation()
-  const actionData = useActionData<typeof action>()
+  const actionData = useActionData<typeof action | any>()
   const [errorFields, setErrorFields] = useState<any>()
   const [token, setToken] = useState<string>('')
   const [isCopied, setIsCopied] = useState<boolean>(false)
@@ -52,7 +47,7 @@ export default function ClientNewPage() {
     // 1. Must be lowercase alphanumeric characters (a-z, 0-9) and dash
     if (!/^[a-z0-9-]*$/.test(value)) {
       errors.push(
-        'Client ID must contain only lowercase letters (a-z), numbers (0-9), no space and dashes (-).',
+        'Client ID must contain only lowercase letters (a-z), numbers (0-9), no space and dashes (-).'
       )
     }
 
@@ -114,12 +109,13 @@ export default function ClientNewPage() {
               <Alert variant="success" className="mb-3">
                 <CheckCircle2Icon size={18} className="dark:text-green-100" />
                 <AlertTitle>
-                  Make sure to copy your personal token now. You won&apos;t be able to see
-                  it again!
+                  Make sure to copy your personal token now. You won&apos;t be able to see it again!
                 </AlertTitle>
                 <AlertDescription>
                   <div className="flex items-center gap-2">
-                    <div className="mt-2 flex items-center justify-between rounded-lg bg-green-100 px-3 py-2 text-sm dark:bg-green-600">
+                    <div
+                      className="mt-2 flex items-center justify-between rounded-lg bg-green-100 px-3
+                        py-2 text-sm dark:bg-green-600">
                       <span className="font-mono font-medium dark:text-white">
                         {actionData?.data?.secret}
                       </span>
@@ -172,10 +168,7 @@ export default function ClientNewPage() {
                 </dl>
               </div>
               <div className="mt-3 flex justify-end">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => navigate('/clients')}>
+                <Button type="button" variant="secondary" onClick={() => navigate('/clients')}>
                   Back
                 </Button>
               </div>
@@ -198,9 +191,7 @@ export default function ClientNewPage() {
                   }}
                   className={cn(errorFields?.name && 'input-error')}
                 />
-                {errorFields?.name && (
-                  <span className="error-message">{errorFields.name}</span>
-                )}
+                {errorFields?.name && <span className="error-message">{errorFields.name}</span>}
               </div>
               <div className="mb-3">
                 <Label className="required">Client ID</Label>
@@ -211,9 +202,7 @@ export default function ClientNewPage() {
                   className={cn(errorFields?.client_id && 'input-error')}
                 />
                 {errorFields?.client_id?.length > 0 && (
-                  <span className="error-message !normal-case">
-                    {errorFields.client_id[0]}
-                  </span>
+                  <span className="error-message !normal-case">{errorFields.client_id[0]}</span>
                 )}
                 <Alert variant="warning" className="mt-3">
                   <AlertCircleIcon size={18} className="dark:text-blue-100" />
@@ -224,19 +213,14 @@ export default function ClientNewPage() {
                     <ul className="list-inside list-disc text-sm">
                       <li>Lowercase alphanumeric characters (a-z, 0-9)</li>
                       <li>Cannot start or end with a dash</li>
-                      <li>
-                        No underscores (_), uppercase letters, or other special characters
-                      </li>
+                      <li>No underscores (_), uppercase letters, or other special characters</li>
                       <li>Must be ≤ 63 characters in length</li>
                     </ul>
                   </AlertDescription>
                 </Alert>
               </div>
               <div className="mt-10 flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => navigate('/clients')}>
+                <Button type="button" variant="secondary" onClick={() => navigate('/clients')}>
                   Cancel
                 </Button>
                 <Button

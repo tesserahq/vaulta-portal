@@ -8,11 +8,9 @@ import {
   data,
   useLoaderData,
   useNavigate,
-} from '@remix-run/react'
-import type { LinksFunction, LoaderFunctionArgs, TypedResponse } from '@remix-run/node'
-import { useChangeLanguage } from 'remix-i18next/react'
+} from 'react-router'
+import type { LinksFunction, LoaderFunctionArgs } from 'react-router'
 import { Auth0Provider } from '@auth0/auth0-react'
-import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
 
 // Import global CSS styles for the application
 // The ?url query parameter tells the bundler to handle this as a URL import
@@ -31,6 +29,8 @@ import { useNonce } from '@/hooks/useNonce'
 import { useToast } from '@/hooks/useToast'
 import { GenericErrorBoundary } from '@/components/misc/ErrorBoundary'
 import { ProgressBar } from './components/misc/ProgressBar'
+import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export const handle = { i18n: ['translation'] }
 
@@ -53,10 +53,7 @@ export const links: LinksFunction = () => {
   ]
 }
 
-export type LoaderData = Exclude<
-  Awaited<ReturnType<typeof loader>>,
-  Response | TypedResponse<unknown>
->
+export type LoaderData = Exclude<Awaited<ReturnType<typeof loader>>, Response>
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = null
@@ -92,9 +89,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
       headers: combineHeaders(
         { 'Set-Cookie': await localeCookie.serialize(locale) },
         toastHeaders,
-        csrfCookieHeader ? { 'Set-Cookie': csrfCookieHeader } : null,
+        csrfCookieHeader ? { 'Set-Cookie': csrfCookieHeader } : null
       ),
-    },
+    }
   )
 }
 
@@ -146,9 +143,14 @@ export default function AppWithProviders() {
   const nonce = useNonce()
   const theme = useTheme()
   const navigate = useNavigate()
+  const { i18n } = useTranslation()
 
   // Updates the i18n instance language.
-  useChangeLanguage(locale)
+  useEffect(() => {
+    if (locale) {
+      i18n.changeLanguage(locale).catch(() => {})
+    }
+  }, [i18n, locale])
 
   // Renders toast (if any).
   useToast(toast)
@@ -156,22 +158,20 @@ export default function AppWithProviders() {
   return (
     <Document nonce={nonce} theme={theme} lang={locale ?? 'en'}>
       <ProgressBar />
-      <AuthenticityTokenProvider token={csrfToken}>
-        <Auth0Provider
-          domain={domain ?? ''}
-          clientId={clientID ?? ''}
-          // useRefreshTokens={true}
-          onRedirectCallback={() => {
-            navigate(hostUrl || 'http://localhost:3000')
-          }}
-          authorizationParams={{
-            redirect_uri: hostUrl || 'http://localhost:3000',
-            organization: organizationID,
-            audience: audience,
-          }}>
-          <Outlet />
-        </Auth0Provider>
-      </AuthenticityTokenProvider>
+      <Auth0Provider
+        domain={domain ?? ''}
+        clientId={clientID ?? ''}
+        // useRefreshTokens={true}
+        onRedirectCallback={() => {
+          navigate(hostUrl || 'http://localhost:3000')
+        }}
+        authorizationParams={{
+          redirect_uri: hostUrl || 'http://localhost:3000',
+          organization: organizationID,
+          audience: audience,
+        }}>
+        <Outlet />
+      </Auth0Provider>
     </Document>
   )
 }
@@ -184,9 +184,7 @@ export function ErrorBoundary() {
     <Document nonce={nonce} theme={theme}>
       <GenericErrorBoundary
         statusHandlers={{
-          403: ({ error }) => (
-            <p>You are not allowed to do that: {error?.data.message}</p>
-          ),
+          403: ({ error }) => <p>You are not allowed to do that: {error?.data.message}</p>,
         }}
       />
     </Document>

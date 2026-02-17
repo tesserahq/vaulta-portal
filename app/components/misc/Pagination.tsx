@@ -1,10 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { IPagingInfo } from '@/types/pagination'
-import {
-  PaginationComponent,
-  PaginationContent,
-  PaginationItem,
-} from '@/components/ui/pagination'
+import { PaginationComponent, PaginationContent, PaginationItem } from '@/components/ui/pagination'
 import {
   Select,
   SelectContent,
@@ -14,7 +10,7 @@ import {
 } from '@/components/ui/select'
 import { useState } from 'react'
 import { useScopedParams } from '@/utils/scoped_params'
-import { useNavigate } from '@remix-run/react'
+import { useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -58,10 +54,7 @@ export const Pagination = ({ meta }: { meta: IPagingInfo }) => {
         <PaginationContent>
           {current_page > 1 && (
             <PaginationItem>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => onNavigate(current_page - 1)}>
+              <Button variant="outline" size="icon" onClick={() => onNavigate(current_page - 1)}>
                 <ChevronLeft />
               </Button>
             </PaginationItem>
@@ -81,10 +74,7 @@ export const Pagination = ({ meta }: { meta: IPagingInfo }) => {
           ))}
           {current_page !== total_pages && (
             <PaginationItem>
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => onNavigate(current_page + 1)}>
+              <Button size="icon" variant="outline" onClick={() => onNavigate(current_page + 1)}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </PaginationItem>

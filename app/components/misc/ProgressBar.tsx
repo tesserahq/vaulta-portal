@@ -1,5 +1,5 @@
 import { cn } from '@/utils/misc'
-import { useNavigation } from '@remix-run/react'
+import { useNavigation } from 'react-router'
 import { useEffect, useRef, useState } from 'react'
 
 export function ProgressBar() {
@@ -14,7 +14,7 @@ export function ProgressBar() {
     if (active) setAnimationComplete(false)
 
     Promise.allSettled(ref.current.getAnimations().map(({ finished }) => finished)).then(
-      () => !active && setAnimationComplete(true),
+      () => !active && setAnimationComplete(true)
     )
   }, [active])
 
@@ -27,13 +27,12 @@ export function ProgressBar() {
       <div
         ref={ref}
         className={cn(
-          'h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-500 ease-in-out',
-          navigation.state === 'idle' &&
-            animationComplete &&
-            'w-0 opacity-0 transition-none',
+          `h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-500
+          ease-in-out`,
+          navigation.state === 'idle' && animationComplete && 'w-0 opacity-0 transition-none',
           navigation.state === 'submitting' && 'w-4/12',
           navigation.state === 'loading' && 'w-10/12',
-          navigation.state === 'idle' && !animationComplete && 'w-full',
+          navigation.state === 'idle' && !animationComplete && 'w-full'
         )}
       />
     </div>

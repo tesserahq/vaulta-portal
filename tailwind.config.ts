@@ -22,13 +22,12 @@ const customColors = {
 }
 
 const config = {
-  darkMode: ['class'],
+  darkMode: 'class',
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
-    './node_modules/core-ui/src/**/*.{js,jsx,ts,tsx}',
   ],
   prefix: '',
   theme: {
@@ -103,6 +102,12 @@ const config = {
           'sidebar-ring': 'hsl(var(--sidebar-ring))',
         },
         ...customColors,
+        shiki: {
+          light: 'var(--shiki-light)',
+          'light-bg': 'var(--shiki-light-bg)',
+          dark: 'var(--shiki-dark)',
+          'dark-bg': 'var(--shiki-dark-bg)',
+        },
       },
       boxShadow: {
         soft: '0 3px 10px 0 rgb(48 46 56 / 6%)',
@@ -190,7 +195,6 @@ const config = {
       },
     },
   },
-  plugins: [],
 } satisfies Config
 
 export default config
