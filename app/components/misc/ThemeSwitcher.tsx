@@ -1,7 +1,7 @@
 import type { Theme, ThemeExtended } from '@/hooks/useTheme'
-import { useSubmit, useFetcher } from '@remix-run/react'
+import { useFetcher, useSubmit } from 'react-router'
 import { Sun, Moon, Monitor } from 'lucide-react'
-import { ROUTE_PATH as THEME_PATH } from '@/routes/resources+/update-theme'
+import { ROUTE_PATH as THEME_PATH } from '@/routes/resources/update-theme'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { useOptimisticThemeMode } from '@/hooks/useTheme'
 
@@ -28,7 +28,7 @@ export function ThemeSwitcher({
             action: THEME_PATH,
             navigate: false,
             fetcherKey: 'theme-fetcher',
-          },
+          }
         )
       }>
       <SelectTrigger className={triggerClass ?? ''}>

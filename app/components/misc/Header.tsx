@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useRequestInfo } from '@/hooks/useRequestInfo'
-import { ROUTE_PATH as THEME_PATH } from '@/routes/resources+/update-theme'
+import { ROUTE_PATH as THEME_PATH } from '@/routes/resources/update-theme'
 import { cn } from '@/utils/misc'
-import { Link, useNavigate, useSubmit } from '@remix-run/react'
-import { ProfileMenu } from 'core-ui'
+import { Link, useNavigate, useSubmit } from 'react-router'
+import { ProfileMenu } from 'tessera-ui'
 import { Grip } from 'lucide-react'
 import React, { useState } from 'react'
 import { Avatar, AvatarImage } from '../ui/avatar'
@@ -39,7 +39,7 @@ export default function Header({
         action: THEME_PATH,
         navigate: false,
         fetcherKey: 'theme-fetcher',
-      },
+      }
     )
   }
 
@@ -94,8 +94,9 @@ export default function Header({
                     variant="ghost"
                     size="icon"
                     className={cn(
-                      'focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0',
-                      isOpenAppMenu && 'bg-accent',
+                      `focus-visible:ring-0 focus-visible:ring-transparent
+                      focus-visible:ring-offset-0`,
+                      isOpenAppMenu && 'bg-accent'
                     )}>
                     <Grip />
                   </Button>
@@ -110,7 +111,8 @@ export default function Header({
                         to={app.link}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex flex-col items-center justify-center rounded-lg px-4 py-2 transition-all duration-200 hover:bg-accent">
+                        className="flex flex-col items-center justify-center rounded-lg px-4 py-2
+                          transition-all duration-200 hover:bg-accent">
                         <Avatar>
                           <AvatarImage src={`/images/apps/${app.name}-logo.png`} />
                         </Avatar>

@@ -1,5 +1,6 @@
-import type { ErrorResponse } from '@remix-run/router'
-import { isRouteErrorResponse, useParams, useRouteError } from '@remix-run/react'
+import { JSX } from 'react'
+import type { ErrorResponse } from 'react-router'
+import { isRouteErrorResponse, useParams, useRouteError } from 'react-router'
 
 type StatusHandler = (info: {
   error: ErrorResponse
@@ -29,7 +30,9 @@ export function GenericErrorBoundary({
   }
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center dark:text-primary-foreground">
+    <div
+      className="flex h-full w-full flex-col items-center justify-center
+        dark:text-primary-foreground">
       {isRouteErrorResponse(error)
         ? (statusHandlers?.[error.status] ?? defaultStatusHandler)({
             error,
@@ -42,12 +45,7 @@ export function GenericErrorBoundary({
 
 export function getErrorMessage(err: unknown) {
   if (typeof err === 'string') return err
-  if (
-    err &&
-    typeof err === 'object' &&
-    'message' in err &&
-    typeof err.message === 'string'
-  ) {
+  if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string') {
     return err.message
   }
   console.error('Unable to get error message for error:', err)

@@ -1,6 +1,6 @@
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/utils/misc'
-import { Link, useLocation } from '@remix-run/react'
+import { Link, useLocation } from 'react-router'
 import MenuToggle from '../MenuToggle'
 
 interface ItemProps {
@@ -21,11 +21,7 @@ interface ISidebarPanelProps {
   menuItems: IMenuItemProps[]
 }
 
-export default function SidebarPanel({
-  isExpanded,
-  setIsExpanded,
-  menuItems,
-}: ISidebarPanelProps) {
+export default function SidebarPanel({ isExpanded, setIsExpanded, menuItems }: ISidebarPanelProps) {
   const { pathname } = useLocation()
 
   const getActiveMenu = (menu: string) => {
@@ -33,7 +29,9 @@ export default function SidebarPanel({
   }
 
   return (
-    <div className="sidebar-panel bg-peat-50 flex h-full grow flex-col justify-between bg-white dark:bg-sidebar-background">
+    <div
+      className="sidebar-panel bg-peat-50 flex h-full grow flex-col justify-between bg-white
+        dark:bg-sidebar-background">
       <div className="flex w-full flex-col">
         {/* Sidebar Panel Header */}
         <div className="sidebar-header flex items-center justify-between gap-2">
@@ -60,13 +58,13 @@ export default function SidebarPanel({
                   className={cn(
                     'flex items-center justify-between hover:bg-slate-50 dark:hover:bg-background',
                     (pathname === item.path || getActiveMenu(item.title)) &&
-                      'bg-accent hover:bg-accent',
+                      'bg-accent hover:bg-accent'
                   )}>
                   <Link
                     to={item.path}
                     className={cn(
                       'w-full',
-                      (pathname === item.path || getActiveMenu(item.title)) && 'active',
+                      (pathname === item.path || getActiveMenu(item.title)) && 'active'
                     )}>
                     {item.icon}
                     {item.title}

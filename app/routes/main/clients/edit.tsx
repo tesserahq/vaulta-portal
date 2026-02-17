@@ -11,7 +11,6 @@ import { IClient } from '@/types/client'
 import { cn } from '@/utils/misc'
 import { redirectWithToast } from '@/utils/toast.server'
 import { useAuth0 } from '@auth0/auth0-react'
-import { ActionFunctionArgs } from '@remix-run/node'
 import {
   Form,
   useActionData,
@@ -19,10 +18,11 @@ import {
   useNavigate,
   useNavigation,
   useParams,
-} from '@remix-run/react'
+} from 'react-router'
 import { AlertCircleIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import type { ActionFunctionArgs } from 'react-router'
 
 export function loader() {
   return {
@@ -34,7 +34,7 @@ export function loader() {
 
 export default function ClientEditPage() {
   const { apiUrl, nodeEnv, hostUrl } = useLoaderData<typeof loader>()
-  const actionData = useActionData<typeof action>()
+  const actionData = useActionData<typeof action | any>()
   const navigation = useNavigation()
   const params = useParams()
   const navigate = useNavigate()
@@ -95,9 +95,7 @@ export default function ClientEditPage() {
                 defaultValue={client?.name}
                 className={cn(errorFields?.name && 'input-error')}
               />
-              {errorFields?.name && (
-                <span className="error-message">{errorFields.name}</span>
-              )}
+              {errorFields?.name && <span className="error-message">{errorFields.name}</span>}
             </div>
             <div className="mb-3">
               <Label className="required">Client ID</Label>
@@ -113,26 +111,19 @@ export default function ClientEditPage() {
                 variant={errorFields?.client_id?.length === 1 ? 'destructive' : 'warning'}
                 className="mt-3">
                 <AlertCircleIcon size={18} className="dark:text-blue-100" />
-                <AlertTitle className="mb-1">
-                  Client ID must follow the following rules:
-                </AlertTitle>
+                <AlertTitle className="mb-1">Client ID must follow the following rules:</AlertTitle>
                 <AlertDescription className="py-0">
                   <ul className="list-inside list-disc text-sm">
                     <li>Lowercase alphanumeric characters (a-z, 0-9)</li>
                     <li>Cannot start or end with a dash</li>
-                    <li>
-                      No underscores (_), uppercase letters, or other special characters
-                    </li>
+                    <li>No underscores (_), uppercase letters, or other special characters</li>
                     <li>Must be ≤ 63 characters in length</li>
                   </ul>
                 </AlertDescription>
               </Alert>
             </div>
             <div className="mt-10 flex items-center justify-end gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => navigate('/clients')}>
+              <Button type="button" variant="secondary" onClick={() => navigate('/clients')}>
                 Cancel
               </Button>
               <Button disabled={navigation.state === 'submitting'}>
