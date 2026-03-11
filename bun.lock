@@ -49,7 +49,7 @@
         "react-router": "^7.13.0",
         "react-router-dom": "^7.11.0",
         "remix-i18next": "^7.0.0",
-        "remix-utils": "9.2.0",
+        "remix-utils": "9.3.0",
         "shiki": "^4.0.0",
         "sonner": "^2.0.7",
         "tailwind-merge": "^3.0.0",
@@ -1382,7 +1382,7 @@
 
     "remix-i18next": ["remix-i18next@7.4.2", "", { "peerDependencies": { "i18next": "^24.0.0 || ^25.0.0", "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-i18next": "^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.0", "react-router": "^7.0.0" } }, "sha512-k8IUyft4hXxJ6HNE+K2l29DXCvMywZJOC7jOw99Bb/Gh87i2umLiOGKV1Aiub6E+QflkTkd9/JgS2Jo5Ngw2VA=="],
 
-    "remix-utils": ["remix-utils@9.2.0", "", { "dependencies": { "type-fest": "^4.41.0" }, "peerDependencies": { "@edgefirst-dev/batcher": "^1.0.0", "@edgefirst-dev/jwt": "^1.2.0", "@edgefirst-dev/server-timing": "^0.0.1", "@oslojs/crypto": "^1.0.1", "@oslojs/encoding": "^1.1.0", "@standard-schema/spec": "^1.0.0", "intl-parse-accept-language": "^1.0.0", "is-ip": "^5.0.1", "react": "^18.0.0 || ^19.0.0", "react-router": "^7.0.0" }, "optionalPeers": ["@edgefirst-dev/batcher", "@edgefirst-dev/jwt", "@edgefirst-dev/server-timing", "@oslojs/crypto", "@oslojs/encoding", "@standard-schema/spec", "intl-parse-accept-language", "is-ip", "react", "react-router"] }, "sha512-QFrgQQz4lSoZ3KkwN314ctIVR9XEXJlu/AWUzvo/KqqZ0FS2vij6D9Folh3QlcLuCBSmPTDDhf0cDhY8D1FcUw=="],
+    "remix-utils": ["remix-utils@9.3.0", "", { "dependencies": { "type-fest": "^5.4.4" }, "peerDependencies": { "@edgefirst-dev/batcher": "^1.0.0", "@edgefirst-dev/jwt": "^1.2.0", "@edgefirst-dev/server-timing": "^0.0.1", "@oslojs/crypto": "^1.0.1", "@oslojs/encoding": "^1.1.0", "@standard-schema/spec": "^1.0.0", "intl-parse-accept-language": "^1.0.0", "is-ip": "^5.0.1", "react": "^18.0.0 || ^19.0.0", "react-router": "^7.0.0" }, "optionalPeers": ["@edgefirst-dev/batcher", "@edgefirst-dev/jwt", "@edgefirst-dev/server-timing", "@oslojs/crypto", "@oslojs/encoding", "@standard-schema/spec", "intl-parse-accept-language", "is-ip", "react", "react-router"] }, "sha512-xrLRW6Xbm3/QT97Pt8W7Au2605iFkiq9X0THpuGnY93uc7BJefNLpSok8ORFgRzbHIbpp3rCJr19r05k861YZQ=="],
 
     "resolve": ["resolve@2.0.0-next.6", "", { "dependencies": { "es-errors": "^1.3.0", "is-core-module": "^2.16.1", "node-exports-info": "^1.6.0", "object-keys": "^1.1.1", "path-parse": "^1.0.7", "supports-preserve-symlinks-flag": "^1.0.0" }, "bin": { "resolve": "bin/resolve" } }, "sha512-3JmVl5hMGtJ3kMmB3zi3DL25KfkCEyy3Tw7Gmw7z5w8M9WlwoPFnIvwChzu1+cF3iaK3sp18hhPz8ANeimdJfA=="],
 
@@ -1490,6 +1490,8 @@
 
     "synckit": ["synckit@0.11.12", "", { "dependencies": { "@pkgr/core": "^0.2.9" } }, "sha512-Bh7QjT8/SuKUIfObSXNHNSK6WHo6J1tHCqJsuaFDP7gP0fkzSfTxI8y85JrppZ0h8l0maIgc2tfuZQ6/t3GtnQ=="],
 
+    "tagged-tag": ["tagged-tag@1.0.0", "", {}, "sha512-yEFYrVhod+hdNyx7g5Bnkkb0G6si8HJurOoOEgC8B/O0uXLHlaey/65KRv6cuWBNhBgHKAROVpc7QyYqE5gFng=="],
+
     "tailwind-merge": ["tailwind-merge@3.4.1", "", {}, "sha512-2OA0rFqWOkITEAOFWSBSApYkDeH9t2B3XSJuI4YztKBzK3mX0737A2qtxDZ7xkw9Zfh0bWl+r34sF3HXV+Ig7Q=="],
 
     "tailwindcss": ["tailwindcss@4.1.18", "", {}, "sha512-4+Z+0yiYyEtUVCScyfHCxOYP06L5Ne+JiHhY2IjR2KWMIWhJOYZKLSGZaP5HkZ8+bY0cxfzwDE5uOmzFXyIwxw=="],
@@ -1518,7 +1520,7 @@
 
     "type-check": ["type-check@0.4.0", "", { "dependencies": { "prelude-ls": "^1.2.1" } }, "sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew=="],
 
-    "type-fest": ["type-fest@4.41.0", "", {}, "sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA=="],
+    "type-fest": ["type-fest@5.4.4", "", { "dependencies": { "tagged-tag": "^1.0.0" } }, "sha512-JnTrzGu+zPV3aXIUhnyWJj4z/wigMsdYajGLIYakqyOW1nPllzXEJee0QQbHj+CTIQtXGlAjuK0UY+2xTyjVAw=="],
 
     "type-is": ["type-is@2.0.1", "", { "dependencies": { "content-type": "^1.0.5", "media-typer": "^1.1.0", "mime-types": "^3.0.0" } }, "sha512-OZs6gsjF4vMp32qrCbiVSkrFmXtG/AZhY3t0iAMrMBiAZyV9oALtXO8hsrHbMXF9x6L3grlFuwW2oAz7cav+Gw=="],
 
