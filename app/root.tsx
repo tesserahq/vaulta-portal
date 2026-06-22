@@ -10,7 +10,7 @@ import {
   useNavigate,
 } from 'react-router'
 import type { LinksFunction, LoaderFunctionArgs } from 'react-router'
-import { Auth0Provider } from '@auth0/auth0-react'
+import { AuthProvider } from 'tessera-ui'
 
 // Import global CSS styles for the application
 // The ?url query parameter tells the bundler to handle this as a URL import
@@ -19,7 +19,6 @@ import SpinnerCSS from '@/styles/customs/spinner.css?url'
 import { SITE_CONFIG } from '@/constants/brand'
 import { combineHeaders, getDomainUrl } from '@/utils/misc.server'
 import { getToastSession } from '@/utils/toast.server'
-import { csrf } from '@/utils/csrf.server'
 import { getHints } from '@/hooks/useHints'
 import { getTheme, Theme, useTheme } from '@/hooks/useTheme'
 import i18nServer, { localeCookie } from '@/modules/i18n/i18n.server'
@@ -60,12 +59,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const locale = await i18nServer.getLocale(request)
   const { toast, headers: toastHeaders } = await getToastSession(request)
-  const [csrfToken, csrfCookieHeader] = await csrf.commitToken()
   const clientID = process.env.AUTH0_CLIENT_ID
   const domain = process.env.AUTH0_DOMAIN
   const audience = process.env.AUTH0_AUDIENCE
   const organizationID = process.env.AUTH0_ORGANIZATION_ID
   const hostUrl = process.env.HOST_URL
+  const identiesApiUrl = process.env.IDENTIES_API_URL
 
   return data(
     {
@@ -73,10 +72,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
       user,
       locale,
       toast,
-      csrfToken,
       clientID,
       domain,
       audience,
+      identiesApiUrl,
       organizationID,
       requestInfo: {
         hints: getHints(request),
@@ -86,11 +85,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       },
     } as const,
     {
-      headers: combineHeaders(
-        { 'Set-Cookie': await localeCookie.serialize(locale) },
-        toastHeaders,
-        csrfCookieHeader ? { 'Set-Cookie': csrfCookieHeader } : null
-      ),
+      headers: combineHeaders({ 'Set-Cookie': await localeCookie.serialize(locale) }, toastHeaders),
     }
   )
 }
@@ -137,7 +132,7 @@ function Document({
 }
 
 export default function AppWithProviders() {
-  const { locale, toast, csrfToken, clientID, domain, audience, hostUrl, organizationID } =
+  const { locale, toast, clientID, domain, audience, hostUrl, identiesApiUrl, organizationID } =
     useLoaderData<typeof loader>()
 
   const nonce = useNonce()
@@ -158,20 +153,21 @@ export default function AppWithProviders() {
   return (
     <Document nonce={nonce} theme={theme} lang={locale ?? 'en'}>
       <ProgressBar />
-      <Auth0Provider
-        domain={domain ?? ''}
-        clientId={clientID ?? ''}
-        // useRefreshTokens={true}
-        onRedirectCallback={() => {
-          navigate(hostUrl || 'http://localhost:3000')
+      <AuthProvider
+        auth0={{
+          domain: domain ?? '',
+          clientId: clientID ?? '',
+          audience: audience ?? '',
+          organizationID: organizationID ?? '',
+          redirectUri: hostUrl || 'http://localhost:3000',
         }}
-        authorizationParams={{
-          redirect_uri: hostUrl || 'http://localhost:3000',
-          organization: organizationID,
-          audience: audience,
-        }}>
+        identiesApiUrl={identiesApiUrl ?? ''}
+        onUnauthenticated={() => {
+          navigate('/')
+        }}
+        requireAuth={false}>
         <Outlet />
-      </Auth0Provider>
+      </AuthProvider>
     </Document>
   )
 }

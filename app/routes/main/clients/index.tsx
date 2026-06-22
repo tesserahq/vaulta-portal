@@ -41,11 +41,7 @@ export default function ClientPage() {
 
     try {
       const token = await getAccessTokenSilently()
-      const response = await fetchApi(
-        `${apiUrl}/clients?skip=${skip}&limit${limit}`,
-        token,
-        nodeEnv
-      )
+      const response = await fetchApi(`${apiUrl}/clients?page=${skip}&size${limit}`, token, nodeEnv)
 
       setClients(response)
       setToken(token)
