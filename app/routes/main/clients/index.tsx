@@ -36,12 +36,12 @@ export default function ClientPage() {
   const [token, setToken] = useState<string>('')
   const deleteRef = useRef<React.ElementRef<typeof ModalDelete>>(null)
 
-  const getClients = async (skip: number = 0, limit: number = 100) => {
+  const getClients = async (page: number = 1, size: number = 50) => {
     setIsLoading(true)
 
     try {
       const token = await getAccessTokenSilently()
-      const response = await fetchApi(`${apiUrl}/clients?page=${skip}&size${limit}`, token, nodeEnv)
+      const response = await fetchApi(`${apiUrl}/clients?page=${page}&size${size}`, token, nodeEnv)
 
       setClients(response)
       setToken(token)
