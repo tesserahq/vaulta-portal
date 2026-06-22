@@ -12,7 +12,6 @@ pre-commit:
       run: bunx prettier --write {staged_files}
       auto_add: true
     typecheck:
-      glob: '**/*.{js,jsx,ts,tsx,json}'
+      glob: '**/*.{ts,tsx}'
       exclude: '**/locales/**'
-      run: bunx typecheck {staged_files}
-      auto_add: true
+      run: bun run typecheck
