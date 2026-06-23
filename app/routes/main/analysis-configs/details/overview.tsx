@@ -1,10 +1,19 @@
 import { AppPreloader } from '@/components/misc/AppPreloader'
+import { DetailContent } from '@/components/detail-content/detail-content'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAnalysisConfig } from '@/resources/analysis-configs/analysis-config.hook'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+  useAnalysisConfig,
+  useDeleteAnalysisConfig,
+} from '@/resources/analysis-configs/analysis-config.hook'
+import { EllipsisVertical, Pencil, Trash2 } from 'lucide-react'
+import { useRef } from 'react'
 import { useLoaderData, useNavigate, useParams } from 'react-router'
 import { DateTime, useApp } from 'tessera-ui'
+import DeleteConfirmation, {
+  type DeleteConfirmationHandle,
+} from 'tessera-ui/components/delete-confirmation'
 
 export function loader() {
   return {
@@ -18,6 +27,7 @@ export default function AnalysisConfigOverviewPage() {
   const params = useParams()
   const navigate = useNavigate()
   const { token, isLoadingIdenties } = useApp()
+  const deleteConfirmationRef = useRef<DeleteConfirmationHandle>(null)
 
   const analysisConfigID = params.analysisConfigID as string
   const config = { apiUrl: apiUrl!, token: token!, nodeEnv }
@@ -26,16 +36,60 @@ export default function AnalysisConfigOverviewPage() {
     enabled: !!token && !isLoadingIdenties,
   })
 
+  const { mutateAsync: deleteConfig } = useDeleteAnalysisConfig(config, {
+    onSuccess: () => {
+      deleteConfirmationRef.current?.close()
+      navigate('/analysis-configs')
+    },
+    onError: () => {
+      deleteConfirmationRef.current?.updateConfig({ isLoading: false })
+    },
+  })
+
+  const handleDelete = () => {
+    deleteConfirmationRef.current?.open({
+      title: 'Delete Analysis Config',
+      description: `Are you sure you want to delete "${analysisConfig?.name}"? This action cannot be undone.`,
+      onDelete: async () => {
+        deleteConfirmationRef.current?.updateConfig({ isLoading: true })
+        await deleteConfig(analysisConfigID)
+      },
+    })
+  }
+
   if (isLoadingIdenties || isLoading) {
     return <AppPreloader className="min-h-screen" />
   }
 
   return (
-    <Card className="card-center animate-slide-up">
-      <CardHeader>
-        <CardTitle>Analysis Config Detail</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <>
+      <DetailContent
+        title="Analysis Config Detail"
+        actions={
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button size="icon" variant="ghost">
+                <EllipsisVertical />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-44 p-2">
+              <Button
+                variant="ghost"
+                className="flex w-full justify-start"
+                onClick={() => navigate(`/analysis-configs/${analysisConfigID}/edit`)}>
+                <Pencil />
+                <span>Edit</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="group flex w-full justify-start hover:bg-red-500"
+                onClick={handleDelete}>
+                <Trash2 className="group-hover:text-white" />
+                <span className="group-hover:text-white">Delete</span>
+              </Button>
+            </PopoverContent>
+          </Popover>
+        }>
         <div className="d-list">
           <div className="d-item">
             <div className="d-label">Name</div>
@@ -77,13 +131,9 @@ export default function AnalysisConfigOverviewPage() {
             </div>
           </div>
         </div>
-      </CardContent>
-      <CardFooter className="flex justify-end gap-2">
-        <Button variant="secondary" onClick={() => navigate('/analysis-configs')}>
-          Back
-        </Button>
-        <Button onClick={() => navigate(`/analysis-configs/${analysisConfigID}/edit`)}>Edit</Button>
-      </CardFooter>
-    </Card>
+      </DetailContent>
+
+      <DeleteConfirmation ref={deleteConfirmationRef} />
+    </>
   )
 }
