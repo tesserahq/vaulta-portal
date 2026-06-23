@@ -55,11 +55,13 @@ export default function AnalysisConfigEditPage() {
 
   useEffect(() => {
     if (analysisConfig) {
+      console.log('analysis ', analysisConfig)
+
       setIsDefault(analysisConfig.is_default)
       setProvider(analysisConfig.provider)
       setProviderParamsText(JSON.stringify(analysisConfig.provider_params ?? {}, null, 2))
     }
-  }, [analysisConfig])
+  }, [analysisConfig, providers])
 
   const { mutateAsync: updateConfig, isPending } = useUpdateAnalysisConfig(config, {
     onSuccess: () => {
@@ -101,7 +103,7 @@ export default function AnalysisConfigEditPage() {
     await updateConfig({ id: analysisConfigID, body: validated.data })
   }
 
-  if (isLoadingIdenties || isLoading) {
+  if (isLoadingIdenties || isLoading || isLoadingProviders) {
     return <AppPreloader />
   }
 
@@ -126,7 +128,11 @@ export default function AnalysisConfigEditPage() {
 
             <div className="mb-3">
               <Label className="required">Provider</Label>
-              <Select value={provider} onValueChange={setProvider}>
+              <Select
+                value={provider}
+                onValueChange={(value) => {
+                  if (value) setProvider(value)
+                }}>
                 <SelectTrigger className={cn(errorFields?.provider && 'input-error')}>
                   <SelectValue
                     placeholder={isLoadingProviders ? 'Loading providers...' : 'Select a provider'}
