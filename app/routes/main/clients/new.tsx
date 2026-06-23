@@ -5,37 +5,44 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { fetchApi } from '@/libraries/fetch'
+import { useCreateClient } from '@/resources/clients/client.hook'
+import { IClient } from '@/types/client'
 import { clientSchema } from '@/schemas/client'
 import { formatString } from '@/utils/format-string'
 import { cn } from '@/utils/misc'
-import { redirectWithToast } from '@/utils/toast.server'
-import { useAuth0 } from '@auth0/auth0-react'
-import type { ActionFunctionArgs } from 'react-router'
-import { Form, useActionData, useNavigate, useNavigation } from 'react-router'
-import { format } from 'date-fns'
+import { useNavigate, useLoaderData } from 'react-router'
 import { AlertCircleIcon, Check, CheckCircle2Icon, Copy } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+import { useState } from 'react'
+import { DateTime, useApp } from 'tessera-ui'
+
+export function loader() {
+  return {
+    apiUrl: process.env.API_URL,
+    nodeEnv: process.env.NODE_ENV,
+  }
+}
 
 export default function ClientNewPage() {
+  const { apiUrl, nodeEnv } = useLoaderData<typeof loader>()
   const navigate = useNavigate()
-  const navigation = useNavigation()
-  const actionData = useActionData<typeof action | any>()
+  const { token, isLoadingIdenties } = useApp()
   const [errorFields, setErrorFields] = useState<any>()
-  const [token, setToken] = useState<string>('')
   const [isCopied, setIsCopied] = useState<boolean>(false)
-  const { getAccessTokenSilently } = useAuth0()
+  const [createdClient, setCreatedClient] = useState<IClient | null>(null)
   const [formValue, setFormValue] = useState<{ name: string; client_id: string }>({
     name: '',
     client_id: '',
   })
 
-  const fetchToken = async () => {
-    const token = await getAccessTokenSilently()
+  const config = { apiUrl: apiUrl!, token: token!, nodeEnv }
 
-    if (token) setToken(token)
-  }
+  const { mutate: createClient, isPending } = useCreateClient(config, {
+    onSuccess: (data) => {
+      setCreatedClient(data)
+      setErrorFields(null)
+      setFormValue({ name: '', client_id: '' })
+    },
+  })
 
   const onValidateClientID = (value: string) => {
     const errors: string[] = []
@@ -67,44 +74,37 @@ export default function ClientNewPage() {
     }
 
     if (errors.length > 0) {
-      setErrorFields((prev: any) => ({
-        ...prev,
-        client_id: errors,
-      }))
+      setErrorFields((prev: any) => ({ ...prev, client_id: errors }))
     } else {
-      setErrorFields((prev: any) => ({
-        ...prev,
-        client_id: null,
-      }))
+      setErrorFields((prev: any) => ({ ...prev, client_id: null }))
     }
 
     setFormValue({ ...formValue, client_id: value })
   }
 
-  useEffect(() => {
-    fetchToken()
-  }, [])
+  const handleSubmit = (e: { preventDefault: () => void }) => {
+    e.preventDefault()
 
-  useEffect(() => {
-    if (actionData?.errors) {
-      setErrorFields(actionData.errors)
+    const validated = clientSchema.safeParse(formValue)
+
+    if (!validated.success) {
+      setErrorFields(validated.error.flatten().fieldErrors)
+      return
     }
 
-    if (actionData?.success) {
-      toast.success('Client created successfully')
-      setErrorFields(null)
-      setFormValue({ name: '', client_id: '' })
+    if (!isLoadingIdenties && token) {
+      createClient(formValue)
     }
-  }, [actionData])
+  }
 
   return (
-    <div className="coreui-content-center">
-      <Card className="coreui-card-center">
+    <div className="content-center pt-5">
+      <Card className="card-center">
         <CardHeader>
           <CardTitle>Create Client</CardTitle>
         </CardHeader>
         <CardContent>
-          {actionData?.success ? (
+          {createdClient ? (
             <>
               <Alert variant="success" className="mb-3">
                 <CheckCircle2Icon size={18} className="dark:text-green-100" />
@@ -117,7 +117,7 @@ export default function ClientNewPage() {
                       className="mt-2 flex items-center justify-between rounded-lg bg-green-100 px-3
                         py-2 text-sm dark:bg-green-600">
                       <span className="font-mono font-medium dark:text-white">
-                        {actionData?.data?.secret}
+                        {createdClient.secret}
                       </span>
                       <TooltipProvider delayDuration={100}>
                         <Tooltip>
@@ -127,9 +127,8 @@ export default function ClientNewPage() {
                               size="icon"
                               className="ml-2 h-5 w-5 dark:bg-transparent dark:text-white"
                               onClick={() => {
-                                navigator.clipboard.writeText(actionData?.data?.secret)
+                                navigator.clipboard.writeText(createdClient.secret || '')
                                 setIsCopied(true)
-
                                 setTimeout(() => setIsCopied(false), 2000)
                               }}>
                               {isCopied ? <Check /> : <Copy />}
@@ -148,22 +147,22 @@ export default function ClientNewPage() {
               <div className="d-list">
                 <dl className="d-item">
                   <dt className="d-label">Name</dt>
-                  <dd className="d-content">{actionData?.data?.name}</dd>
+                  <dd className="d-content">{createdClient.name}</dd>
                 </dl>
                 <dl className="d-item">
                   <dt className="d-label">Client ID</dt>
-                  <dd className="d-content">{actionData?.data?.client_id}</dd>
+                  <dd className="d-content">{createdClient.client_id}</dd>
                 </dl>
                 <dl className="d-item">
                   <dt className="d-label">Created At</dt>
                   <dd className="d-content">
-                    {format(actionData?.data?.created_at || '', 'PPpp')}
+                    {createdClient.created_at ? <DateTime date={createdClient.created_at} /> : '-'}
                   </dd>
                 </dl>
                 <dl className="d-item">
                   <dt className="d-label">Updated At</dt>
                   <dd className="d-content">
-                    {format(actionData?.data?.updated_at || '', 'PPpp')}
+                    {createdClient.updated_at ? <DateTime date={createdClient.updated_at} /> : '-'}
                   </dd>
                 </dl>
               </div>
@@ -174,8 +173,7 @@ export default function ClientNewPage() {
               </div>
             </>
           ) : (
-            <Form method="POST">
-              <input name="token" type="hidden" value={token} />
+            <form onSubmit={handleSubmit}>
               <div className="mb-3">
                 <Label className="required">Name</Label>
                 <Input
@@ -224,57 +222,20 @@ export default function ClientNewPage() {
                   Cancel
                 </Button>
                 <Button
+                  type="submit"
                   disabled={
-                    navigation.state === 'submitting' ||
+                    isPending ||
                     !formValue.name ||
                     !formValue.client_id ||
                     errorFields?.client_id?.length > 0
                   }>
-                  {navigation.state === 'submitting' ? 'Saving...' : 'Save'}
+                  {isPending ? 'Saving...' : 'Save'}
                 </Button>
               </div>
-            </Form>
+            </form>
           )}
         </CardContent>
       </Card>
     </div>
   )
-}
-
-export async function action({ request }: ActionFunctionArgs) {
-  const apiUrl = process.env.API_URL
-  const nodeEnv = process.env.NODE_ENV
-  const formData = await request.formData()
-  const token = formData.get('token') as string
-  const name = formData.get('name') as string
-  const client_id = formData.get('client_id') as string
-
-  const validated = clientSchema.safeParse({
-    name,
-    client_id,
-  })
-
-  if (!validated.success) {
-    return Response.json({ errors: validated.error.flatten().fieldErrors })
-  }
-
-  try {
-    const response = await fetchApi(`${apiUrl}/clients`, token, nodeEnv, {
-      method: 'POST',
-      body: JSON.stringify({
-        name,
-        client_id,
-      }),
-    })
-
-    return { success: true, data: response }
-  } catch (error: any) {
-    const convertError = JSON.parse(error?.message)
-
-    return redirectWithToast(convertError.status === 401 ? '/logout' : '/clients/new', {
-      type: 'error',
-      title: 'Error',
-      description: `${convertError.status} - ${convertError.error}`,
-    })
-  }
 }

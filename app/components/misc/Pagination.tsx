@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { IPagingInfo } from '@/types/pagination'
 import { PaginationComponent, PaginationContent, PaginationItem } from '@/components/ui/pagination'
 import {
@@ -17,13 +16,13 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 export const Pagination = ({ meta }: { meta: IPagingInfo }) => {
   const { getScopedSearch } = useScopedParams()
   const navigate = useNavigate()
-  const { current_page, total_pages, total_count, page_size } = meta
-  const pages = Array.from({ length: total_pages }, (_, i) => i + 1)
+  const { page, pages, size } = meta
+  const pageList = Array.from({ length: pages }, (_, i) => i + 1)
 
-  const [row, setRow] = useState<string>(meta.page_size.toString())
+  const [row, setRow] = useState<string>(size.toString())
 
   const onChange = (value: string) => {
-    navigate(getScopedSearch({ page_size: value }))
+    navigate(getScopedSearch({ size: value, page: 1 }))
     setRow(value)
   }
 
@@ -52,29 +51,29 @@ export const Pagination = ({ meta }: { meta: IPagingInfo }) => {
       </div>
       <PaginationComponent>
         <PaginationContent>
-          {current_page > 1 && (
+          {page > 1 && (
             <PaginationItem>
-              <Button variant="outline" size="icon" onClick={() => onNavigate(current_page - 1)}>
+              <Button variant="outline" size="icon" onClick={() => onNavigate(page - 1)}>
                 <ChevronLeft />
               </Button>
             </PaginationItem>
           )}
-          {pages.map((page) => (
-            <PaginationItem key={page}>
+          {pageList.map((p) => (
+            <PaginationItem key={p}>
               <Button
-                variant={page === current_page ? 'default' : 'outline'}
+                variant={p === page ? 'default' : 'outline'}
                 onClick={() => {
-                  if (page !== current_page) {
-                    onNavigate(page)
+                  if (p !== page) {
+                    onNavigate(p)
                   }
                 }}>
-                {page}
+                {p}
               </Button>
             </PaginationItem>
           ))}
-          {current_page !== total_pages && (
+          {page !== pages && (
             <PaginationItem>
-              <Button size="icon" variant="outline" onClick={() => onNavigate(current_page + 1)}>
+              <Button size="icon" variant="outline" onClick={() => onNavigate(page + 1)}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </PaginationItem>

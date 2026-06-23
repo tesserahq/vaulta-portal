@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AppPreloader } from '@/components/misc/AppPreloader'
 import ModalDelete from '@/components/misc/DeleteConfirmation'
 import EmptyContent from '@/components/misc/EmptyContent'
@@ -17,69 +16,81 @@ import { format } from 'date-fns'
 import { EllipsisVertical, EyeIcon, Pencil, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { useApp, NewButton } from 'tessera-ui'
+import { useClients, useDeleteClient } from '@/resources/clients/client.hook'
+import { ensureCanonicalPagination } from '@/utils/helpers/pagination.helper'
+import DeleteConfirmation, {
+  type DeleteConfirmationHandle,
+} from 'tessera-ui/components/delete-confirmation'
 
-export function loader() {
-  return {
-    apiUrl: process.env.API_URL,
-    nodeEnv: process.env.NODE_ENV,
+export async function loader({ request }: { request: Request }) {
+  const pagination = ensureCanonicalPagination(request, {
+    defaultSize: 25,
+    defaultPage: 1,
+  })
+
+  if (pagination instanceof Response) {
+    return pagination
   }
+
+  const apiUrl = process.env.API_URL
+  const nodeEnv = process.env.NODE_ENV
+
+  return { apiUrl, nodeEnv, pagination }
 }
 
 export default function ClientPage() {
-  const { apiUrl, nodeEnv } = useLoaderData<typeof loader>()
-  const actionData = useActionData<typeof action>()
-  const { getAccessTokenSilently } = useAuth0()
+  const { apiUrl, nodeEnv, pagination } = useLoaderData<typeof loader>()
   const navigate = useNavigate()
-  const [clients, setClients] = useState<IClient[]>([])
-  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [clientDelete, setClientDelete] = useState<IClient>()
-  const [token, setToken] = useState<string>('')
   const deleteRef = useRef<React.ElementRef<typeof ModalDelete>>(null)
+  const { token, isLoadingIdenties } = useApp()
+  const deleteConfirmationRef = useRef<DeleteConfirmationHandle>(null)
 
-  const getClients = async (page: number = 1, size: number = 50) => {
-    setIsLoading(true)
+  const config = { apiUrl: apiUrl!, token: token!, nodeEnv }
 
-    try {
-      const token = await getAccessTokenSilently()
-      const response = await fetchApi(`${apiUrl}/clients?page=${page}&size${size}`, token, nodeEnv)
+  const { data, isLoading } = useClients(
+    config,
+    {
+      page: pagination.page,
+      size: pagination.size,
+    },
+    { enabled: !!token && !isLoadingIdenties }
+  )
 
-      setClients(response)
-      setToken(token)
-    } catch (error: any) {
-      toast.error(error.message)
-    }
+  const { mutateAsync: deleteClient } = useDeleteClient(config, {
+    onSuccess: () => {
+      deleteConfirmationRef.current?.close()
+    },
+    onError: () => {
+      deleteConfirmationRef?.current?.updateConfig({ isLoading: false })
+    },
+  })
 
-    setIsLoading(false)
+  const handleDelete = (client: IClient) => {
+    deleteConfirmationRef.current?.open({
+      title: 'Delete Client',
+      description: `Are you sure you want to delete "${client.name}"? This action cannot be undone.`,
+      onDelete: async () => {
+        deleteConfirmationRef?.current?.updateConfig({ isLoading: true })
+        await deleteClient(client.id)
+      },
+    })
   }
 
-  useEffect(() => {
-    getClients()
-  }, [])
-
-  useEffect(() => {
-    if (actionData?.success) {
-      // show success message
-      toast.success(actionData.message)
-      // close modal
-      deleteRef?.current?.onClose()
-      // refresh credentials
-      getClients()
-    }
-  }, [actionData])
-
-  if (isLoading) {
+  if (isLoading || isLoadingIdenties) {
     return <AppPreloader />
   }
 
   return (
-    <div className="animate-slide-up">
+    <div className="animate-slide-up page-content">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold dark:text-foreground">Clients</h1>
-        <Button onClick={() => navigate('new')}>New Client</Button>
+        <NewButton onClick={() => navigate('new')} label="New Client" />
       </div>
 
       <div className="mt-4">
-        {clients.length === 0 && (
+        {data?.total === 0 ? (
           <EmptyContent
             image="/images/empty-client.png"
             title="Manage Your Clients with Ease"
@@ -88,103 +99,67 @@ export default function ClientPage() {
               Start Creating
             </Button>
           </EmptyContent>
-        )}
-        {clients.map((client) => {
-          return (
-            <Card key={client.id} className="mb-2.5 shadow-card">
-              <CardContent className="flex items-center gap-2 pt-4">
-                <div className="flex-1">
-                  <Link
-                    to={client.id}
-                    className="mb-1 text-base font-medium text-black hover:text-primary
-                      hover:underline dark:text-primary-foreground">
-                    {client.name}
-                  </Link>
-                  <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
-                    <div>
-                      <span>Client ID : </span>
-                      <span>{client.client_id}</span>
+        ) : (
+          data?.items.map((client) => {
+            return (
+              <Card key={client.id} className="mb-2.5 shadow-card">
+                <CardContent className="flex items-center gap-2 pt-4">
+                  <div className="flex-1">
+                    <Link
+                      to={client.id}
+                      className="mb-1 text-base font-medium text-black hover:text-primary
+                        hover:underline dark:text-primary-foreground">
+                      {client.name}
+                    </Link>
+                    <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
+                      <div>
+                        <span>Client ID : </span>
+                        <span>{client.client_id}</span>
+                      </div>
+                      <Separator orientation="vertical" className="mx-2 h-4" />
+                      <span>Updated {formatDateAgo(client.updated_at)}</span>
+                      <Separator orientation="vertical" className="mx-2 h-4" />
+                      <span>Created {format(client.created_at, 'dd MMM yyyy')}</span>
                     </div>
-                    <Separator orientation="vertical" className="mx-2 h-4" />
-                    <span>Updated {formatDateAgo(client.updated_at)}</span>
-                    <Separator orientation="vertical" className="mx-2 h-4" />
-                    <span>Created {format(client.created_at, 'dd MMM yyyy')}</span>
                   </div>
-                </div>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button size="icon" variant="ghost">
-                      <EllipsisVertical />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent align="end" className="w-44 p-2">
-                    <Button
-                      variant="ghost"
-                      className="flex w-full justify-start"
-                      onClick={() => navigate(client.id)}>
-                      <EyeIcon />
-                      <span>View</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="flex w-full justify-start"
-                      onClick={() => navigate(`${client.id}/edit`)}>
-                      <Pencil />
-                      <span>Edit</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="group flex w-full justify-start hover:bg-red-500"
-                      onClick={() => {
-                        deleteRef.current?.onOpen()
-                        setClientDelete(client)
-                      }}>
-                      <Trash2 className="group-hover:text-white" />
-                      <span className="group-hover:text-white">Delete</span>
-                    </Button>
-                  </PopoverContent>
-                </Popover>
-              </CardContent>
-            </Card>
-          )
-        })}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button size="icon" variant="ghost">
+                        <EllipsisVertical />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" className="w-44 p-2">
+                      <Button
+                        variant="ghost"
+                        className="flex w-full justify-start"
+                        onClick={() => navigate(client.id)}>
+                        <EyeIcon />
+                        <span>View</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="flex w-full justify-start"
+                        onClick={() => navigate(`${client.id}/edit`)}>
+                        <Pencil />
+                        <span>Edit</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="group flex w-full justify-start hover:bg-red-500"
+                        onClick={() => handleDelete(client)}>
+                        <Trash2 className="group-hover:text-white" />
+                        <span className="group-hover:text-white">Delete</span>
+                      </Button>
+                    </PopoverContent>
+                  </Popover>
+                </CardContent>
+              </Card>
+            )
+          })
+        )}
       </div>
 
-      <ModalDelete
-        ref={deleteRef}
-        alert="Client"
-        title={`Delete "${clientDelete?.name}" client?`}
-        data={{
-          token: token,
-          name: clientDelete?.name,
-          id: clientDelete?.id,
-        }}
-      />
+      <DeleteConfirmation ref={deleteConfirmationRef} />
     </div>
   )
-}
-
-export async function action({ request }: ActionFunctionArgs) {
-  const apiUrl = process.env.API_URL
-  const nodeEnv = process.env.NODE_ENV
-  const formData = await request.formData()
-  const { id, token, name } = Object.fromEntries(formData)
-
-  try {
-    if (request.method === 'DELETE') {
-      await fetchApi(`${apiUrl}/clients/${id}`, token.toString(), nodeEnv, {
-        method: 'DELETE',
-      })
-
-      return { success: true, message: `Client ${name} deleted successfully` }
-    }
-  } catch (error: any) {
-    const convertError = JSON.parse(error?.message)
-
-    return redirectWithToast(convertError.status === 401 ? '/logout' : '/clients', {
-      type: 'error',
-      title: 'Error',
-      description: `${convertError.status} - ${convertError.error}`,
-    })
-  }
 }

@@ -5,88 +5,73 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { fetchApi } from '@/libraries/fetch'
 import { clientSchema } from '@/schemas/client'
-import { IClient } from '@/types/client'
+import { useClient, useUpdateClient } from '@/resources/clients/client.hook'
 import { cn } from '@/utils/misc'
-import { redirectWithToast } from '@/utils/toast.server'
-import { useAuth0 } from '@auth0/auth0-react'
-import {
-  Form,
-  useActionData,
-  useLoaderData,
-  useNavigate,
-  useNavigation,
-  useParams,
-} from 'react-router'
+import { useLoaderData, useNavigate, useParams } from 'react-router'
 import { AlertCircleIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
-import type { ActionFunctionArgs } from 'react-router'
+import { useApp } from 'tessera-ui'
 
 export function loader() {
   return {
     apiUrl: process.env.API_URL,
     nodeEnv: process.env.NODE_ENV,
-    hostUrl: process.env.HOST_URL,
   }
 }
 
 export default function ClientEditPage() {
-  const { apiUrl, nodeEnv, hostUrl } = useLoaderData<typeof loader>()
-  const actionData = useActionData<typeof action | any>()
-  const navigation = useNavigation()
+  const { apiUrl, nodeEnv } = useLoaderData<typeof loader>()
   const params = useParams()
   const navigate = useNavigate()
-  const { getAccessTokenSilently, logout } = useAuth0()
-  const [client, setClient] = useState<IClient>()
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [token, setToken] = useState<string>('')
+  const { token, isLoadingIdenties } = useApp()
   const [errorFields, setErrorFields] = useState<any>()
 
-  const fetchClientDetail = async () => {
-    try {
-      const token = await getAccessTokenSilently()
-      const response = await fetchApi(`${apiUrl}/clients/${params.id}`, token, nodeEnv)
+  const clientID = params.clientID as string
+  const config = { apiUrl: apiUrl!, token: token!, nodeEnv }
 
-      setClient(response)
-      setToken(token)
-    } catch (error: any) {
-      const convertError = JSON.parse(error?.message)
+  const { data: client, isLoading } = useClient(config, clientID, {
+    enabled: !!token && !isLoadingIdenties,
+  })
 
-      if (convertError.status === 401) {
-        logout({ logoutParams: { returnTo: hostUrl } })
-      }
+  const { mutateAsync: updateClient, isPending } = useUpdateClient(config, {
+    onSuccess: () => {
+      toast.success('Client updated successfully')
+      navigate('/clients')
+    },
+  })
 
-      toast.error(`${convertError.status} - ${convertError.error}`)
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const formData = new FormData(event.currentTarget)
+    const name = formData.get('name') as string
+    const client_id = formData.get('client_id') as string
+
+    const validated = clientSchema.safeParse({ name, client_id })
+
+    if (!validated.success) {
+      setErrorFields(validated.error.flatten().fieldErrors)
+      return
     }
 
-    setIsLoading(false)
+    setErrorFields(null)
+    await updateClient({ id: clientID, body: { name, client_id } })
   }
 
-  useEffect(() => {
-    fetchClientDetail()
-  }, [])
-
-  useEffect(() => {
-    if (actionData?.errors) {
-      setErrorFields(actionData.errors)
-    }
-  }, [actionData])
-
-  if (isLoading) {
+  if (isLoadingIdenties || isLoading) {
     return <AppPreloader />
   }
 
   return (
-    <div className="content-center">
+    <div className="content-center pt-5">
       <Card className="card-center">
         <CardHeader>
           <CardTitle>Edit Client</CardTitle>
         </CardHeader>
         <CardContent>
-          <Form method="PUT">
-            <input name="token" value={token} type="hidden" />
+          <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <Label className="required">Name</Label>
               <Input
@@ -126,57 +111,11 @@ export default function ClientEditPage() {
               <Button type="button" variant="secondary" onClick={() => navigate('/clients')}>
                 Cancel
               </Button>
-              <Button disabled={navigation.state === 'submitting'}>
-                {navigation.state === 'submitting' ? 'Updating...' : 'Update'}
-              </Button>
+              <Button disabled={isPending}>{isPending ? 'Updating...' : 'Update'}</Button>
             </div>
-          </Form>
+          </form>
         </CardContent>
       </Card>
     </div>
   )
-}
-
-export async function action({ request, params }: ActionFunctionArgs) {
-  const apiUrl = process.env.API_URL
-  const nodeEnv = process.env.NODE_ENV
-  const formData = await request.formData()
-  const id = params.id as string
-
-  const token = formData.get('token') as string
-  const name = formData.get('name') as string
-  const client_id = formData.get('client_id') as string
-
-  const validated = clientSchema.safeParse({
-    name,
-    client_id,
-  })
-
-  if (!validated.success) {
-    return Response.json({ errors: validated.error.flatten().fieldErrors })
-  }
-
-  try {
-    await fetchApi(`${apiUrl}/clients/${id}`, token, nodeEnv, {
-      method: 'PUT',
-      body: JSON.stringify({
-        name,
-        client_id,
-      }),
-    })
-
-    return redirectWithToast('/clients', {
-      type: 'success',
-      title: 'Success',
-      description: 'Client updated successfully',
-    })
-  } catch (error: any) {
-    const convertError = JSON.parse(error?.message)
-
-    return redirectWithToast(convertError.status === 401 ? '/logout' : `/clients/${id}`, {
-      type: 'error',
-      title: 'Error',
-      description: `${convertError.status} - ${convertError.error}`,
-    })
-  }
 }
