@@ -11,6 +11,7 @@ import {
 } from 'react-router'
 import type { LinksFunction, LoaderFunctionArgs } from 'react-router'
 import { AuthProvider } from 'tessera-ui'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Import global CSS styles for the application
 // The ?url query parameter tells the bundler to handle this as a URL import
@@ -28,21 +29,29 @@ import { useNonce } from '@/hooks/useNonce'
 import { useToast } from '@/hooks/useToast'
 import { GenericErrorBoundary } from '@/components/misc/ErrorBoundary'
 import { ProgressBar } from './components/misc/ProgressBar'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { metaObject } from './utils/helpers/meta.helper'
 
 export const handle = { i18n: ['translation'] }
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return [
-    {
-      title: data ? `${SITE_CONFIG.siteTitle}` : `Error | ${SITE_CONFIG.siteTitle}`,
-    },
-    {
-      name: 'description',
-      content: SITE_CONFIG.siteDescription,
-    },
-  ]
+export const meta: MetaFunction<typeof loader> = ({ data, location }) => {
+  // Get the current page title from the pathname
+  const getPageTitle = () => {
+    const path = location.pathname
+    // Remove leading slash and convert to title case
+    if (path === '/') return 'Home'
+
+    const pageName = path.split('/').pop() || ''
+    return pageName
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  }
+
+  const pageTitle = getPageTitle()
+
+  return metaObject(data ? pageTitle : 'Error')
 }
 
 export const links: LinksFunction = () => {
@@ -140,6 +149,19 @@ export default function AppWithProviders() {
   const navigate = useNavigate()
   const { i18n } = useTranslation()
 
+  // Create a single QueryClient instance per app session (stable across renders).
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 5 * 60 * 1000, // 5 minutes
+            retry: 1,
+          },
+        },
+      })
+  )
+
   // Updates the i18n instance language.
   useEffect(() => {
     if (locale) {
@@ -153,21 +175,23 @@ export default function AppWithProviders() {
   return (
     <Document nonce={nonce} theme={theme} lang={locale ?? 'en'}>
       <ProgressBar />
-      <AuthProvider
-        auth0={{
-          domain: domain ?? '',
-          clientId: clientID ?? '',
-          audience: audience ?? '',
-          organizationID: organizationID ?? '',
-          redirectUri: hostUrl || 'http://localhost:3000',
-        }}
-        identiesApiUrl={identiesApiUrl ?? ''}
-        onUnauthenticated={() => {
-          navigate('/')
-        }}
-        requireAuth={false}>
-        <Outlet />
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider
+          auth0={{
+            domain: domain ?? '',
+            clientId: clientID ?? '',
+            audience: audience ?? '',
+            organizationID: organizationID ?? '',
+            redirectUri: hostUrl || 'http://localhost:3000',
+          }}
+          identiesApiUrl={identiesApiUrl ?? ''}
+          onUnauthenticated={() => {
+            navigate('/')
+          }}
+          requireAuth={false}>
+          <Outlet />
+        </AuthProvider>
+      </QueryClientProvider>
     </Document>
   )
 }
