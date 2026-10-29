@@ -1,11 +1,12 @@
 export const bytesForHuman = (bytes: number, decimals = 2) => {
-  const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB']
 
-  let i = 0
+  let unitIndex = 0
 
-  for (i; bytes > 1024; i++) {
+  while (bytes >= 1024 && unitIndex < units.length - 1) {
     bytes /= 1024
+    unitIndex += 1
   }
 
-  return parseFloat(bytes.toFixed(decimals)) + ' ' + units[i]
+  return parseFloat(bytes.toFixed(decimals)) + ' ' + units[unitIndex]
 }
