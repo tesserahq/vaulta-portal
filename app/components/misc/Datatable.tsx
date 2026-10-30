@@ -1,6 +1,15 @@
 'use client'
 
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import {
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  flexRender,
+  rowSelectionFeature,
+  tableFeatures,
+  useTable,
+} from '@tanstack/react-table'
+import type { ColumnDef, RowData } from '@tanstack/react-table'
 
 import {
   Table,
@@ -13,23 +22,30 @@ import {
 import { Pagination } from './Pagination'
 import { IPagingInfo } from '@/types/pagination'
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
+const features = tableFeatures({
+  columnSizingFeature,
+  columnResizingFeature,
+  columnVisibilityFeature,
+  rowSelectionFeature,
+})
+
+interface DataTableProps<TData extends RowData> {
+  columns: ColumnDef<typeof features, TData>[]
   data: TData[]
   meta?: IPagingInfo
   empty?: React.ReactNode
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends RowData>({
   columns,
   data,
   meta,
   empty,
-}: DataTableProps<TData, TValue>) {
-  const table = useReactTable({
+}: DataTableProps<TData>) {
+  const table = useTable({
+    features,
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
     enableColumnResizing: true,
     defaultColumn: {
       size: 200,
