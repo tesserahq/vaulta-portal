@@ -1,4 +1,5 @@
 import { createRequestHandler } from '@react-router/express'
+import { RouterContextProvider } from 'react-router'
 import crypto from 'crypto'
 import express from 'express'
 import compression from 'compression'
@@ -167,17 +168,17 @@ if (viteDevServer) {
   build = mod.default ?? mod
 }
 
-app.all(
-  /.*/,
-  createRequestHandler({
-    getLoadContext: (_, res) => ({
-      cspNonce: res.locals.cspNonce,
-    }),
+const requestHandler = createRequestHandler({
+  getLoadContext: () => new RouterContextProvider(),
+  build,
+  mode: NODE_ENV,
+})
 
-    build,
-    mode: NODE_ENV,
-  })
-)
+app.all(/.*/, (req, res, next) => {
+  // Overwrite any client-supplied value with this request's server-generated CSP nonce.
+  req.headers['x-vaulta-csp-nonce'] = res.locals.cspNonce
+  return requestHandler(req, res, next)
+})
 
 if (process.env.TRUST_PROXY) {
   app.set('trust proxy', 1 /* number of proxies between user and server */)

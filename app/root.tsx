@@ -22,7 +22,7 @@ import { combineHeaders, getDomainUrl } from '@/utils/misc.server'
 import { getToastSession } from '@/utils/toast.server'
 import { getHints } from '@/hooks/useHints'
 import { getTheme, Theme, useTheme } from '@/hooks/useTheme'
-import i18nServer, { localeCookie } from '@/modules/i18n/i18n.server'
+import { getLocale, i18nextMiddleware, localeCookie } from '@/modules/i18n/i18n.server'
 import { Toaster } from '@/components/ui/sonner'
 import { ClientHintCheck } from '@/components/misc/ClientHints'
 import { useNonce } from '@/hooks/useNonce'
@@ -35,7 +35,7 @@ import { metaObject } from './utils/helpers/meta.helper'
 
 export const handle = { i18n: ['translation'] }
 
-export const meta: MetaFunction<typeof loader> = ({ data, location }) => {
+export const meta: MetaFunction<typeof loader> = ({ loaderData, location }) => {
   // Get the current page title from the pathname
   const getPageTitle = () => {
     const path = location.pathname
@@ -51,8 +51,10 @@ export const meta: MetaFunction<typeof loader> = ({ data, location }) => {
 
   const pageTitle = getPageTitle()
 
-  return metaObject(data ? pageTitle : 'Error')
+  return metaObject(loaderData ? pageTitle : 'Error')
 }
+
+export const middleware = [i18nextMiddleware]
 
 export const links: LinksFunction = () => {
   return [
@@ -63,10 +65,10 @@ export const links: LinksFunction = () => {
 
 export type LoaderData = Exclude<Awaited<ReturnType<typeof loader>>, Response>
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
   const user = null
 
-  const locale = await i18nServer.getLocale(request)
+  const locale = getLocale(context)
   const { toast, headers: toastHeaders } = await getToastSession(request)
   const clientID = process.env.AUTH0_CLIENT_ID
   const domain = process.env.AUTH0_DOMAIN
