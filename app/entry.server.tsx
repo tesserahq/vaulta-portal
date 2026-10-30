@@ -1,14 +1,15 @@
 import { isbot } from 'isbot'
 import { PassThrough } from 'node:stream'
 import { renderToPipeableStream } from 'react-dom/server'
+import { I18nextProvider } from 'react-i18next'
 import { createInstance } from 'i18next'
-import { I18nextProvider, initReactI18next } from 'react-i18next'
+import { initReactI18next } from 'react-i18next'
 import { initEnvs } from '@/utils/env.server'
 import { NonceProvider } from '@/hooks/useNonce'
-import i18nServer from '@/modules/i18n/i18n.server'
+import { getInstance } from '@/modules/i18n/i18n.server'
 import * as i18n from '@/modules/i18n/i18n'
 import { createReadableStreamFromReadable } from '@react-router/node'
-import type { AppLoadContext, EntryContext } from 'react-router'
+import type { EntryContext, RouterContextProvider } from 'react-router'
 import { ServerRouter } from 'react-router'
 
 /**
@@ -17,21 +18,31 @@ import { ServerRouter } from 'react-router'
 initEnvs()
 
 const ABORT_DELAY = 5_000
+const fallbackI18n = createInstance()
+const fallbackI18nReady = fallbackI18n.use(initReactI18next).init({ ...i18n })
 
 export default async function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
   reactRouterContext: EntryContext,
-  loadContext: AppLoadContext
+  routerContext: RouterContextProvider
 ) {
   const callbackName = isbot(request.headers.get('user-agent')) ? 'onAllReady' : 'onShellReady'
+  let requestI18n
+  try {
+    requestI18n = getInstance(routerContext)
+  } catch (error) {
+    if (!(error instanceof Error) || error.message !== 'No value found for context') throw error
+    await fallbackI18nReady
+    requestI18n = fallbackI18n
+  }
 
   /**
    * Content Security Policy.
    * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
    */
-  const nonce = String(loadContext.cspNonce) ?? undefined
+  const nonce = request.headers.get('x-vaulta-csp-nonce') ?? ''
 
   /**
    * Currently, we're not setting the CSP headers due to lack of support on deferred scripts.
@@ -46,21 +57,11 @@ export default async function handleRequest(
   /**
    * Internationalization (i18n).
    */
-  const instance = createInstance()
-  const lng = await i18nServer.getLocale(request)
-
-  await instance.use(initReactI18next).init({
-    ...i18n,
-    lng,
-    ns: ['translation'],
-    resources: i18n.resources,
-  })
-
   return new Promise((resolve, reject) => {
     let shellRendered = false
     const { pipe, abort } = renderToPipeableStream(
       <NonceProvider value={nonce}>
-        <I18nextProvider i18n={instance}>
+        <I18nextProvider i18n={requestI18n}>
           <ServerRouter context={reactRouterContext} url={request.url} />
         </I18nextProvider>
       </NonceProvider>,

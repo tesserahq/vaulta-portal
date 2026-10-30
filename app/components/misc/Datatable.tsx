@@ -1,6 +1,9 @@
 'use client'
 
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { flexRender } from '@tanstack/react-table'
+import type { RowData } from '@tanstack/react-table'
+import { getCoreRowModel, useLegacyTable } from '@tanstack/react-table/legacy'
+import type { LegacyColumnDef } from '@tanstack/react-table/legacy'
 
 import {
   Table,
@@ -13,20 +16,20 @@ import {
 import { Pagination } from './Pagination'
 import { IPagingInfo } from '@/types/pagination'
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
+interface DataTableProps<TData extends RowData> {
+  columns: LegacyColumnDef<TData>[]
   data: TData[]
   meta?: IPagingInfo
   empty?: React.ReactNode
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends RowData>({
   columns,
   data,
   meta,
   empty,
-}: DataTableProps<TData, TValue>) {
-  const table = useReactTable({
+}: DataTableProps<TData>) {
+  const table = useLegacyTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
