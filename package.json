@@ -66,7 +66,7 @@
     "shiki": "^4.5.0",
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.7.0",
-    "tessera-ui": "git+https://github.com/tesserahq/tessera-ui.git",
+    "tessera-ui": "github:tesserahq/tessera-ui#f2809d83d7d012be28533d89b77c95ca5d9725f6",
     "tsx": "4.23.15",
     "zod": "^3.24.1"
   },
