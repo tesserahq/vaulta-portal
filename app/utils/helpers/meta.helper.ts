@@ -6,7 +6,7 @@ import { ClientLoaderFunction, LoaderFunction, MetaDescriptor, MetaFunction } fr
 type MetaDescriptors = Array<MetaDescriptor>
 
 type CreateMetaArgs<RouteData = any> = {
-  data: RouteData
+  loaderData: RouteData
   params: Record<string, string>
   location: Location
   matches: Array<{
@@ -79,7 +79,7 @@ export function mergeMeta<
  *
  * import { mergeRouteModuleMeta } from '~/utils/web';
  *
- * export const meta: Route.MetaFunction = mergeRouteModuleMeta(({ data }) => {
+ * export const meta: Route.MetaFunction = mergeRouteModuleMeta(({ loaderData }) => {
  *   return [
  *     { title: "My Leaf Route" },
  *   ];
@@ -88,7 +88,7 @@ export function mergeMeta<
  * // In a parent route:
  * import type { Route } from './+types/root';
  *
- * export const meta: Route.MetaFunction = ({ data }) => {
+ * export const meta: Route.MetaFunction = ({ loaderData }) => {
  *   return [
  *     { title: "My Parent Route" },
  *     { name: 'description', content: "This is the parent route" },
