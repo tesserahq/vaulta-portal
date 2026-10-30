@@ -71,7 +71,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.0.0",
+    "@react-router/dev": "^8.5.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/vite": "^4.3.3",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
