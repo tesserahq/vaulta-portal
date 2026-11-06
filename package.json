@@ -67,7 +67,7 @@
     "tailwind-merge": "^3.7.0",
     "tessera-ui": "github:tesserahq/tessera-ui#b28ebcda89d8804be9026929def89f6f03f64f4f",
     "tsx": "4.23.15",
-    "zod": "^3.24.1"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@react-router/dev": "^8.5.0",
